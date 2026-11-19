@@ -13,15 +13,15 @@ describe(`E2E: ForgetPage`, () => {
     await e2e.sendText(`Aku suka kopi tubruk`, forgetUser)
     expect(bot.db.memory.list(4901).length).toBe(2)
     e2e.clearCalls()
-    const responses = await e2e.sendText(`/lupakan`, forgetUser)
+    const responses = await e2e.sendText(`/forget`, forgetUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(e2e.gmsg(intent, `default`, {}, `id`))
     expect(bot.db.memory.list(4901).length).toBe(0)
   })
 
-  it(`after /lupakan, Angie no longer remembers the earlier like`, async () => {
+  it(`after /forget, Angie no longer remembers the earlier like`, async () => {
     await e2e.sendText(`Aku suka kopi tubruk`, forgetUser)
-    await e2e.sendText(`/lupakan`, forgetUser)
+    await e2e.sendText(`/forget`, forgetUser)
     e2e.clearCalls()
     const responses = await e2e.sendText(`Apa yang aku suka?`, forgetUser)
     const reply = e2e.lastCall(`sendMessage`)!

@@ -4,7 +4,7 @@ import {GoogleService} from "~/lib/google"
 import {AppConfig} from "~/lib/config"
 
 /**
- * /schedule (EN) / /jadwal (ID) [date] — Google Calendar events for one date.
+ * /schedule [date] — Google Calendar events for one date.
  *
  * All words live in `static template` (EN default + `lang="id"` variant);
  * the helper only computes data: the render `state`, the Google failure
@@ -13,7 +13,7 @@ import {AppConfig} from "~/lib/config"
  * Strict rule (Damar 2026-11-19 ~14:43 WIB): no string dictionary.
  */
 export class SchedulePage extends PageBase {
-  static data = this.buildData({intentCommandText: {default: `schedule`, id: `jadwal`}})
+  static data = this.buildData()
 
   async handleCallbackQueryData() {
     await this.gdefault.show()

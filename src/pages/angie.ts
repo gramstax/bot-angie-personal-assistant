@@ -20,7 +20,7 @@ import {TranscribePool} from "~/lib/transcribe-pool"
  * NOTE: angle brackets are never written inside `<g-ifelse>` bodies —
  * `&lt;` there would reach Telegram raw instead of decoded — so the two
  * tool empty-sentences are phrased without a `<...>` placeholder (the full
- * command format still shows in the /tambahtugas and /tambahkontak pages).
+ * command format still shows in the /addtask and /addcontact pages).
  */
 export class AngiePage extends PageBase {
   static data = this.buildData()
@@ -162,7 +162,7 @@ export class AngiePage extends PageBase {
           <g-case is="mock-tools-ok"><g-ifelse>label === 'email' ? 'Here is a summary of your email:' : label === 'calendar' ? 'Here is the schedule I found:' : label === 'tasks' ? 'Here is your task list:' : 'Here are the contacts I found:'</g-ifelse>
 <g-map src="lines" join="\\n">{{e}}</g-map></g-case>
           <g-case is="mock-tools-empty"><g-ifelse>label === 'email' ? 'Here is a summary of your email:' : label === 'calendar' ? 'Here is the schedule I found:' : label === 'tasks' ? 'Here is your task list:' : 'Here are the contacts I found:'</g-ifelse>
-<g-ifelse>label === 'email' ? 'No unread emails today.' : label === 'calendar' ? 'No events on ' + date + '.' : label === 'tasks' ? 'No tasks yet. Add one with /tambahtugas.' : 'No contacts yet. Add one with /tambahkontak.'</g-ifelse></g-case>
+<g-ifelse>label === 'email' ? 'No unread emails today.' : label === 'calendar' ? 'No events on ' + date + '.' : label === 'tasks' ? 'No tasks yet. Add one with /addtask.' : 'No contacts yet. Add one with /addcontact.'</g-ifelse></g-case>
           <g-case is="mock-tools-noconnect"><g-ifelse>label === 'email' ? 'Here is a summary of your email:' : label === 'calendar' ? 'Here is the schedule I found:' : label === 'tasks' ? 'Here is your task list:' : 'Here are the contacts I found:'</g-ifelse>
 <g-ifelse>code === 'gmail-error' ? 'Gmail error ' + status + ' — the token may have expired' : code === 'calendar-error' ? 'Google Calendar error ' + status + ' — the token may have expired' : 'Google is not connected — set GOOGLE_ACCESS_TOKEN in .env'</g-ifelse></g-case>
           <g-case is="voice-empty">Sorry, I could not hear anything in that voice note. Please send it again or just type your message.</g-case>
@@ -181,7 +181,7 @@ export class AngiePage extends PageBase {
           <g-case is="mock-tools-ok"><g-ifelse>label === 'email' ? 'Ini ringkasan emailmu:' : label === 'calendar' ? 'Ini jadwalku yang kutemukan:' : label === 'tasks' ? 'Ini daftar tugasmu:' : 'Ini kontak yang kutemukan:'</g-ifelse>
 <g-map src="lines" join="\\n">{{e}}</g-map></g-case>
           <g-case is="mock-tools-empty"><g-ifelse>label === 'email' ? 'Ini ringkasan emailmu:' : label === 'calendar' ? 'Ini jadwalku yang kutemukan:' : label === 'tasks' ? 'Ini daftar tugasmu:' : 'Ini kontak yang kutemukan:'</g-ifelse>
-<g-ifelse>label === 'email' ? 'Tidak ada email unread hari ini.' : label === 'calendar' ? 'Tidak ada acara pada ' + date + '.' : label === 'tasks' ? 'Belum ada tugas. Tambah dengan /tambahtugas.' : 'Belum ada kontak. Tambah dengan /tambahkontak.'</g-ifelse></g-case>
+<g-ifelse>label === 'email' ? 'Tidak ada email unread hari ini.' : label === 'calendar' ? 'Tidak ada acara pada ' + date + '.' : label === 'tasks' ? 'Belum ada tugas. Tambah dengan /addtask.' : 'Belum ada kontak. Tambah dengan /addcontact.'</g-ifelse></g-case>
           <g-case is="mock-tools-noconnect"><g-ifelse>label === 'email' ? 'Ini ringkasan emailmu:' : label === 'calendar' ? 'Ini jadwalku yang kutemukan:' : label === 'tasks' ? 'Ini daftar tugasmu:' : 'Ini kontak yang kutemukan:'</g-ifelse>
 <g-ifelse>code === 'gmail-error' ? 'Gmail error ' + status + ' — token mungkin kedaluwarsa' : code === 'calendar-error' ? 'Google Calendar error ' + status + ' — token mungkin kedaluwarsa' : 'Google belum terhubung — isi GOOGLE_ACCESS_TOKEN di .env'</g-ifelse></g-case>
           <g-case is="voice-empty">Maaf, aku tidak bisa mendengar isi voice note itu. Coba kirim lagi atau ketik saja pesannya.</g-case>

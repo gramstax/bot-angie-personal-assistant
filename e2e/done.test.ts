@@ -11,7 +11,7 @@ beforeEach(async () => {
 
 describe(`E2E: DonePage`, () => {
   it(`marks a task done (Indonesian)`, async () => {
-    const responses = await e2e.sendText(`/selesai 1`, doneTaskUser)
+    const responses = await e2e.sendText(`/done 1`, doneTaskUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
       e2e.gmsg(intent, `default`, {state: `ok`, id: 1, raw: ``}, `id`),
@@ -30,17 +30,17 @@ describe(`E2E: DonePage`, () => {
   })
 
   it(`reports an unknown id instead of failing silently`, async () => {
-    const responses = await e2e.sendText(`/selesai 99`, doneTaskUser)
+    const responses = await e2e.sendText(`/done 99`, doneTaskUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
       e2e.gmsg(intent, `default`, {state: `notfound`, id: 99, raw: ``}, `id`),
     )
   })
 
-  it(`reports an already-done task on a second /selesai`, async () => {
-    await e2e.sendText(`/selesai 1`, doneTaskUser)
+  it(`reports an already-done task on a second /done`, async () => {
+    await e2e.sendText(`/done 1`, doneTaskUser)
     e2e.clearCalls()
-    const responses = await e2e.sendText(`/selesai 1`, doneTaskUser)
+    const responses = await e2e.sendText(`/done 1`, doneTaskUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
       e2e.gmsg(intent, `default`, {state: `already`, id: 1, raw: ``}, `id`),
@@ -48,15 +48,15 @@ describe(`E2E: DonePage`, () => {
   })
 
   it(`rejects a non-numeric id`, async () => {
-    const responses = await e2e.sendText(`/selesai abc`, doneTaskUser)
+    const responses = await e2e.sendText(`/done abc`, doneTaskUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
       e2e.gmsg(intent, `default`, {state: `invalid`, id: 0, raw: `abc`}, `id`),
     )
   })
 
-  it(`prompts for the id when /selesai has no argument`, async () => {
-    const responses = await e2e.sendText(`/selesai`, doneTaskUser)
+  it(`prompts for the id when /done has no argument`, async () => {
+    const responses = await e2e.sendText(`/done`, doneTaskUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
       e2e.gmsg(intent, `default`, {state: `prompt`, id: 0, raw: ``}, `id`),

@@ -1,7 +1,7 @@
 import {PageBase} from "~/base/page"
 
 /**
- * /contact (EN) / /kontak (ID) [name] — search/list contacts from LMDB.
+ * /contact [name] — search/list contacts from LMDB.
  *
  * All words live in `static template` (EN default + `lang="id"` variant);
  * the helper only computes data: the render `state`, the row list, and the
@@ -9,7 +9,7 @@ import {PageBase} from "~/base/page"
  * words). Strict rule (Damar 2026-11-19 ~14:43 WIB): no string dictionary.
  */
 export class ContactPage extends PageBase {
-  static data = this.buildData({intentCommandText: {default: `contact`, id: `kontak`}})
+  static data = this.buildData()
 
   async handleCallbackQueryData() {
     await this.gdefault.show()
@@ -53,16 +53,16 @@ export class ContactPage extends PageBase {
       <g-description lang="id">Cari kontak</g-description>
       <g-message>
         <g-switch value="state">
-          <g-case is="empty">You have not saved any contacts yet. Add one with /tambahkontak &lt;name&gt; | &lt;email&gt; | &lt;phone&gt; — example: /tambahkontak Budi | budi@mail.com | 08123456789.</g-case>
-          <g-case is="nomatch">No contacts match "{{query}}". Add one with /tambahkontak &lt;name&gt; | &lt;email&gt; | &lt;phone&gt;.</g-case>
+          <g-case is="empty">You have not saved any contacts yet. Add one with /addcontact &lt;name&gt; | &lt;email&gt; | &lt;phone&gt; — example: /addcontact Budi | budi@mail.com | 08123456789.</g-case>
+          <g-case is="nomatch">No contacts match "{{query}}". Add one with /addcontact &lt;name&gt; | &lt;email&gt; | &lt;phone&gt;.</g-case>
           <g-default><g-ifelse>query ? '👤 Contacts for "' + query + '" (' + count + '):' : '👤 Contacts (' + count + '):'</g-ifelse>
 <g-map src="contacts" join="\\n">👤 {{e.name}}{{e.extra}}</g-map></g-default>
         </g-switch>
       </g-message>
       <g-message lang="id">
         <g-switch value="state">
-          <g-case is="empty">Kamu belum menyimpan kontak. Tambah dengan /tambahkontak &lt;nama&gt; | &lt;email&gt; | &lt;telepon&gt; — contoh: /tambahkontak Budi | budi@mail.com | 08123456789.</g-case>
-          <g-case is="nomatch">Tidak ada kontak yang cocok dengan "{{query}}". Tambah dengan /tambahkontak &lt;nama&gt; | &lt;email&gt; | &lt;telepon&gt;.</g-case>
+          <g-case is="empty">Kamu belum menyimpan kontak. Tambah dengan /addcontact &lt;nama&gt; | &lt;email&gt; | &lt;telepon&gt; — contoh: /addcontact Budi | budi@mail.com | 08123456789.</g-case>
+          <g-case is="nomatch">Tidak ada kontak yang cocok dengan "{{query}}". Tambah dengan /addcontact &lt;nama&gt; | &lt;email&gt; | &lt;telepon&gt;.</g-case>
           <g-default><g-ifelse>query ? '👤 Kontak untuk "' + query + '" (' + count + '):' : '👤 Kontak (' + count + '):'</g-ifelse>
 <g-map src="contacts" join="\\n">👤 {{e.name}}{{e.extra}}</g-map></g-default>
         </g-switch>

@@ -1,14 +1,14 @@
 import {PageBase} from "~/base/page"
 
 /**
- * /addtask (EN) / /tambahtugas (ID) <text> — add one task to LMDB.
+ * /addtask <text> — add one task to LMDB.
  *
  * All words live in `static template` (EN default + `lang="id"` variant);
  * the handler only computes data: the render `state` and the new task's
  * `id`/`title`. Strict rule (Damar 2026-11-19 ~14:43 WIB): no string dictionary.
  */
 export class AddTaskPage extends PageBase {
-  static data = this.buildData({intentCommandText: {default: `addtask`, id: `tambahtugas`}})
+  static data = this.buildData()
 
   async handleCommandText() {
     await this.gdefault.show()
@@ -43,20 +43,20 @@ export class AddTaskPage extends PageBase {
       <g-description lang="id">Tambah tugas baru</g-description>
       <g-message>
         <g-switch value="state">
-          <g-case is="full">You have reached the task limit (100). Finish a few first with /selesai &lt;id&gt;.</g-case>
+          <g-case is="full">You have reached the task limit (100). Finish a few first with /done &lt;id&gt;.</g-case>
           <g-case is="added">✅ Task added: [{{id}}] {{title}}
 
-See them all with /tugas.</g-case>
-          <g-default>Write the task after the command — example: /tambahtugas Buy milk at the store.</g-default>
+See them all with /tasks.</g-case>
+          <g-default>Write the task after the command — example: /addtask Buy milk at the store.</g-default>
         </g-switch>
       </g-message>
       <g-message lang="id">
         <g-switch value="state">
-          <g-case is="full">Tugasmu sudah mencapai batas (100). Selesaikan dulu beberapa dengan /selesai &lt;id&gt;.</g-case>
+          <g-case is="full">Tugasmu sudah mencapai batas (100). Selesaikan dulu beberapa dengan /done &lt;id&gt;.</g-case>
           <g-case is="added">✅ Tugas ditambahkan: [{{id}}] {{title}}
 
-Lihat semuanya dengan /tugas.</g-case>
-          <g-default>Tulis tugasnya setelah perintah — contoh: /tambahtugas Beli susu di warung.</g-default>
+Lihat semuanya dengan /tasks.</g-case>
+          <g-default>Tulis tugasnya setelah perintah — contoh: /addtask Beli susu di warung.</g-default>
         </g-switch>
       </g-message>
     </g-base>

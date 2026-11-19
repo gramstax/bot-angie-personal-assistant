@@ -10,7 +10,7 @@ beforeEach(async () => {
 
 describe(`E2E: TasksPage`, () => {
   it(`lists empty tasks (Indonesian, fixture language_code id)`, async () => {
-    const responses = await e2e.sendText(`/tugas`, tasksUser)
+    const responses = await e2e.sendText(`/tasks`, tasksUser)
     expect(responses.length).toBeGreaterThan(0)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
@@ -32,7 +32,7 @@ describe(`E2E: TasksPage`, () => {
     await bot.db.tasks.add(4301, `Cuci motor`)
     await bot.db.tasks.complete(4301, 1)
     e2e.clearCalls()
-    const responses = await e2e.sendText(`/tugas`, tasksUser)
+    const responses = await e2e.sendText(`/tasks`, tasksUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
       e2e.gmsg(
@@ -53,11 +53,11 @@ describe(`E2E: TasksPage`, () => {
     )
   })
 
-  it(`filters the list when /tugas is given a keyword`, async () => {
+  it(`filters the list when /tasks is given a keyword`, async () => {
     await bot.db.tasks.add(4301, `Beli susu`)
     await bot.db.tasks.add(4301, `Cuci motor`)
     e2e.clearCalls()
-    const responses = await e2e.sendText(`/tugas susu`, tasksUser)
+    const responses = await e2e.sendText(`/tasks susu`, tasksUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toContain(`[1] Beli susu`)
     expect(e2e.extractText(reply)).not.toContain(`Cuci motor`)
@@ -66,7 +66,7 @@ describe(`E2E: TasksPage`, () => {
   it(`reports no match for an unknown keyword`, async () => {
     await bot.db.tasks.add(4301, `Beli susu`)
     e2e.clearCalls()
-    const responses = await e2e.sendText(`/tugas zzz`, tasksUser)
+    const responses = await e2e.sendText(`/tasks zzz`, tasksUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
       e2e.gmsg(intent, `default`, {state: `nomatch`, filter: `zzz`, done: 0, total: 1, tasks: []}, `id`),

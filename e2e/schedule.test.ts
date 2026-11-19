@@ -18,7 +18,7 @@ afterEach(() => {
 
 describe(`E2E: SchedulePage`, () => {
   it(`is honest when Google is not connected — no fake events (Indonesian)`, async () => {
-    const responses = await e2e.sendText(`/jadwal`, scheduleUser)
+    const responses = await e2e.sendText(`/schedule`, scheduleUser)
     expect(responses.length).toBeGreaterThan(0)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
@@ -44,8 +44,8 @@ describe(`E2E: SchedulePage`, () => {
     )
   })
 
-  it(`accepts /jadwal besok and still reports the honest not-connected state`, async () => {
-    const responses = await e2e.sendText(`/jadwal besok`, scheduleUser)
+  it(`accepts /schedule besok and still reports the honest not-connected state`, async () => {
+    const responses = await e2e.sendText(`/schedule besok`, scheduleUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toContain(`Google belum terhubung`)
   })
@@ -69,7 +69,7 @@ describe(`E2E: SchedulePage`, () => {
         {status: 200, headers: {"Content-Type": `application/json`}},
       )
     }) as unknown as typeof fetch
-    const responses = await e2e.sendText(`/jadwal`, scheduleUser)
+    const responses = await e2e.sendText(`/schedule`, scheduleUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
       e2e.gmsg(

@@ -19,21 +19,24 @@
    LMDB (`UserSchema.botLang`), changed with `/language`; follow
    `gramstax-best-practices`, `lmdb-best-practices`, and
    `worker-thread-best-practices` (6.1.0).
-6. **Bilingual command text via `intentCommandTextMap` (Damar,
-   2026-11-19 ~14:30 WIB).** Every command has an English (default) and
-   an Indonesian spelling that route to the SAME page — e.g. `/contact`
-   and `/kontak` both open `contact.ts`. Declare it in the existing page
-   only, no new file:
-   `static data = this.buildData({intentCommandText: {default: "contact", id: "kontak"}})`.
-   Framework (Gramstax 6.1.0) registers ALL map values as route intents,
-   so both aliases route regardless of the user's language — the stored
-   `botLang` (applied by `hookBeforeRoute` before routing) selects the
-   RENDER language, not the routing. Commands identical in both
-   languages (`start`, `help`, `email`, `language`, `status`) keep the
-   `buildData()` default (intent falls back to the page name). The
-   free-text handler (`angie.ts`) is not a command — never force it into
-   one. E2E (skill `e2e-coverage.md`, "Intent variants"): send each
-   mapped intent with a fixture carrying that `language_code`
+6. **Commands are ENGLISH ONLY (Damar, 2026-11-19 ~15:22 WIB).** The
+   bilingual-command rule of ~14:30 WIB is REVOKED — so no multi-lang
+   command is ever missed. There is NO `intentCommandText` in any
+   page's `buildData()`: `static data = this.buildData()` (or with a
+   callback-args function where the page has one), and the command is
+   the page name: `/tasks`, `/addtask`, `/done`, `/contact`,
+   `/addcontact`, `/schedule`, `/forget` (+ `/start`, `/help`,
+   `/email`, `/language`, `/status`). Indonesian spellings (`/tugas`,
+   `/tambahtugas`, `/selesai`, `/kontak`, `/tambahkontak`, `/jadwal`,
+   `/lupakan`) do NOT route — they hit the Route Not Found page
+   (proven by probe + `e2e/commands-lang.test.ts`). Message CONTENT
+   is still bilingual (rule 5/7) — an English command from an
+   Indonesian user renders in Indonesian; the stored `botLang`
+   (applied by `hookBeforeRoute`) selects the RENDER language. The
+   free-text handler (`angie.ts`) is not a command — never force it
+   into one. E2E: send each English command with both the `en` and
+   the `id` fixture and assert the matching render language, plus
+   assert every Indonesian spelling lands on Route Not Found
    (`e2e/commands-lang.test.ts`).
 7. **Localization = static template blocks ONLY. `src/lib/i18n.ts` is
    FORBIDDEN (Damar, 2026-11-19 ~14:43 WIB — "tidak berguna").** Every
@@ -98,15 +101,15 @@
     first; never add a duplicate.
 20. **Page file names are ENGLISH only (Damar, 2026-11-19 ~14:55 WIB).**
     `tasks.ts`, `addtask.ts`, `done.ts`, `contact.ts`, `addcontact.ts`,
-    `schedule.ts`, `forget.ts` — never an Indonesian file name. The
-    Indonesian spelling stays reachable through
-    `intentCommandTextMap` (rule 6). Rename with `git mv` so history
-    survives; rename the page class too (`TasksPage`, `AddTaskPage`,
-    `DonePage`, `ContactPage`, `AddContactPage`, `SchedulePage`,
-    `ForgetPage`) and every import, e2e mirror file, and
-    `e2e/COVERAGE.md` row. A rename changes the route (file name =
-    route name in Gramstax 6.1.0), so e2e must prove both command
-    spellings still reach the same page.
+    `schedule.ts`, `forget.ts` — never an Indonesian file name.
+    Commands are English only too (rule 6): the file name IS the
+    command, there is no Indonesian spelling at all. Rename with
+    `git mv` so history survives; rename the page class too
+    (`TasksPage`, `AddTaskPage`, `DonePage`, `ContactPage`,
+    `AddContactPage`, `SchedulePage`, `ForgetPage`) and every import,
+    e2e mirror file, and `e2e/COVERAGE.md` row. A rename changes the
+    route (file name = route name in Gramstax 6.1.0), so e2e must prove
+    the English command reaches the page.
 21. **Command descriptions sync via `<g-description>` (Damar,
     2026-11-19 ~14:55 WIB).** Every command page declares its
     description in its OWN template's default `<g-base>`: one block
@@ -119,13 +122,20 @@
     reads `getGDescription("<page-name>", "default", lang, scope)`, so
     a description placed in start's template would only ever sync
     /start.** Each page carries its own block; `e2e/descriptions.test.ts`
-    proves the sync sees all 11 commands. **Caveat, same probe:** the
-    framework pushes one entry per `handleCommandText` route entry, so
-    a bilingual-mapped page would list its command TWICE in the menu —
-    `BotCore` overrides `executeSyncBlocksDescription` to dedupe by
-    command name (same three passes, same diff-against-`getMyCommands`
-    contract). Do not remove that override without fixing the
-    duplication another way.
+    proves the sync sees all 11 commands. **Confirmed by Damar
+    2026-11-19 ~15:22 WIB: `<g-description>` is PER PAGE** — e.g.
+    /start's description is for that command — so it MUST be defined
+    in EVERY page that has a command handler (`handleCommandText` /
+    `handleCommandArgsText`): all 11 command pages carry their own
+    EN + `lang="id"` blocks; pages without a command handler
+    (`angie.ts` free text, `status.ts`) carry none. **History:**
+    the framework pushes one entry per `handleCommandText` route
+    entry, so a bilingual-mapped page used to list its command TWICE
+    in the menu — `BotCore` overrode `executeSyncBlocksDescription`
+    to dedupe. That override was REMOVED 2026-11-19 when commands
+    went English-only (rule 6): one intent per page, nothing left to
+    duplicate, and the framework's own sync now lists 11 unique
+    commands per language (proven by `e2e/descriptions.test.ts`).
 22. **Multi-language keyboards are defined ONCE in
     `src/blocks/g-keyboard.ts` (Damar, 2026-11-19 ~14:58 WIB).** One
     `{default, id}` label object per keyboard in
@@ -152,8 +162,8 @@
   paralel berebut state export dan hanya menghasilkan 1 thread).
 - **Guard username scaffold TIDAK dipakai**: `hookBeforeRoute` hanya
   registrasi user best-effort + AllowList `ANGIE_ALLOWED_IDS`.
-- **Nama file page = nama route/command**: `tasks.ts` → `/tasks`
-  (Indonesian `/tugas` via `intentCommandTextMap` on the same page).
+- **Nama file page = nama route/command**: `tasks.ts` → `/tasks`.
+  Commands are English only (strict rule 6) — no Indonesian spelling.
   Page files are English only (strict rule 20).
 - Render dari pesan memakai `sendMessage` (bukan `sendRichMessage`)
   di Gramstax 6.1.0 — tes e2e menyesuaikan ini.

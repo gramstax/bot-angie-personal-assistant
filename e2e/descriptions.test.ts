@@ -5,8 +5,10 @@ import {bot, e2e} from "./setup"
  * `<g-description>` sync: every command page declares its BotFather
  * description in its OWN template's default `<g-base>` (EN default +
  * `lang="id"`). On bot start the framework calls
- * `executeSyncBlocksDescription` (BotCore overrides it to dedupe — see
- * src/core/bot.ts), which resolves each command through
+ * `executeSyncBlocksDescription` (the framework default — BotCore's
+ * dedupe override was REMOVED 2026-11-19 when commands went English-only:
+ * one intent per page, so the framework can no longer duplicate a
+ * command in the menu), which resolves each command through
  * `getGDescription` and syncs via `setMyCommands` per language.
  *
  * NOTE (framework finding, 2026-11-19): descriptions CANNOT be
@@ -62,8 +64,8 @@ describe(`E2E: <g-description> sync (BotFather command list)`, () => {
     expect(def).toBeDefined()
     expect(id).toBeDefined()
 
-    // One entry per command — the bilingual intentCommandTextMap must NOT
-    // duplicate a command in the menu (see the BotCore override).
+    // One entry per command — commands are English-only, one intent per
+    // page, so the framework's own sync must list each command once.
     const enCommands = commandsOf(def as never)
     const idCommands = commandsOf(id as never)
     expect(enCommands.length).toBe(11)

@@ -82,24 +82,23 @@ Open Telegram, find your bot, and send `/start`.
 
 ## Commands
 
-Every command works in English and Indonesian. Both spellings open the
-same page — one page, one `intentCommandText` map, no duplicate files.
-Commands that are identical in both languages (`/start`, `/help`,
-`/email`, `/language`, `/status`) use the page name as the command.
+All commands are in English — one command per page, the page name is the
+command, no second spelling. Replies are bilingual: English by default,
+Indonesian when you pick it with `/language`.
 
-| Command (EN / ID) | Description |
-| :---------------- | :---------- |
+| Command | Description |
+| :------ | :---------- |
 | `/start` | Introduction and main menu (Tasks, Contacts, Email, Schedule, Language, Help) |
 | `/help` | Full help |
 | `/language` | Switch language — English / Indonesia (stored per user in LMDB) |
-| `/tasks` / `/tugas` | List your tasks |
-| `/addtask <text>` / `/tambahtugas <text>` | Add a new task |
-| `/done <id>` / `/selesai <id>` | Mark a task done |
-| `/contact [name]` / `/kontak [name]` | Find a contact |
-| `/addcontact <name> \| <email> \| <phone>` / `/tambahkontak <name> \| <email> \| <phone>` | Add a contact |
+| `/tasks` | List your tasks |
+| `/addtask <text>` | Add a new task |
+| `/done <id>` | Mark a task done |
+| `/contact [name]` | Find a contact |
+| `/addcontact <name> \| <email> \| <phone>` | Add a contact |
 | `/email` | Today's unread emails (not promotions) |
-| `/schedule [date]` / `/jadwal [date]` | Events for that day (e.g. `/schedule tomorrow`, `/jadwal 2026-12-25`) |
-| `/forget` / `/lupakan` | Erase Angie's memory of this chat |
+| `/schedule [date]` | Events for that day (e.g. `/schedule tomorrow`, `/schedule 2026-12-25`) |
+| `/forget` | Erase Angie's memory of this chat |
 
 Any other text — or a voice note — goes straight to Angie. She remembers the last 10 messages of your chat.
 
@@ -187,11 +186,11 @@ E2E tests drive the real bot in-process (`deploy: test`) and assert every Telegr
 
 - **The live path (OpenAI + Google) is untested** — no `BOT_TOKEN`, `OPENAI_API_KEY`, or Google OAuth has been provided yet. What tests prove is: the Gramstax 6.1.0 scaffold, LMDB (user/memory/task/contact), the 2-thread worker pool (round-robin, mock transcription), mock AI + tool routing, and every command/page via the e2e harness. Do not claim live works before tokens are set and tested with a real bot.
 - **The worker pool must launch sequentially, not with `Promise.all`**: parallel launches race on the export state — a probe showed only 1 thread alive; sequential launches give 2 threads (see `src/lib/transcribe-pool.ts`).
-- **A page file name is its default route/command**: the task file is named `tasks.ts`, so `/tasks` works out of the box — `/tugas` is added with an `intentCommandText` map on the same page, not a second file.
+- **A page file name is its route/command**: the task file is named `tasks.ts`, so `/tasks` works out of the box. Commands are English only — there is no `intentCommandText` map anywhere.
 - **Rendering from a message uses `sendMessage`**, not `sendRichMessage`, in Gramstax 6.1.0 — the e2e tests follow this.
 - **Google access tokens expire.** The adapter uses the Bearer token from env as-is — there is no auto-refresh. Set a fresh access token when it expires.
 - A live voice note is downloaded via `api.telegram.org/file/bot<token>/...` and sent to Whisper as OGG; the Telegram Bot API caps files at 20 MB.
-- Memory window: the last 10 turns per user; `/forget` (also `/lupakan`) clears it.
+- Memory window: the last 10 turns per user; `/forget` clears it.
 - AllowList: when `ANGIE_ALLOWED_IDS` is set, users outside the list get a rejection message and their update is rejected in `hookBeforeRoute`.
 
 ## Tech Stack

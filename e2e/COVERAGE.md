@@ -21,7 +21,9 @@ pesan user-facing). Keyboard multi-bahasa didefinisikan SEKALI di
 tidak pernah menulis `<g-keyboard>` dua kali. Deskripsi command
 (`<g-description>`, EN + ID) ada di default `<g-base>` tiap page
 command dan disinkronkan ke BotFather saat bot start
-(`BotCore.executeSyncBlocksDescription`, dedup per nama command).
+(`executeSyncBlocksDescription` bawaan framework — 11 command unik per
+bahasa; override dedup `BotCore` dihapus 2026-11-19 karena command kini
+English-only, satu intent per page, tidak ada lagi yang bisa terduplikat).
 StatusPage tidak punya `handle*` sendiri — ia dirender lewat hook
 (lihat baris hook di bawah).
 
@@ -41,44 +43,44 @@ StatusPage tidak punya `handle*` sendiri — ia dirender lewat hook
 | angie | handleFreeText (tool email, Google off) | "Ada email apa hari ini?" | e2e/angie.test.ts | gmsg(angie, default, {kind mock-tools-noconnect, label email, code no-token}, id) |
 | angie | handleFreeText (typing) | teks bebas | e2e/angie.test.ts | calls memuat sendChatAction sebelum balasan |
 | angie | handleFreeVoice | voice note | e2e/angie.test.ts | transkrip "Apa jadwalku besok?" + balasan jadwal + threadCount pool 2 + memory 2 baris |
-| tasks | handleCommandText (kosong id) | `/tugas` kosong | e2e/tasks.test.ts | sendMessage + gmsg(tasks, default, {state empty}, id) |
+| tasks | handleCommandText (kosong id) | `/tasks` kosong | e2e/tasks.test.ts | sendMessage + gmsg(tasks, default, {state empty}, id) |
 | tasks | handleCommandText (kosong en) | `/tasks` kosong | e2e/tasks.test.ts | sendMessage + gmsg(tasks, default, {state empty}, en) |
-| tasks | handleCommandText (isi) | `/tugas` dengan 2 tugas, 1 selesai | e2e/tasks.test.ts | gmsg(tasks, default, {state list, done 1, total 2, tasks [✅ [1], ⬜ [2]]}, id) |
-| tasks | handleCommandArgsText | `/tugas susu` | e2e/tasks.test.ts | hanya tugas yang cocok tampil |
-| tasks | handleCommandArgsText (tak cocok) | `/tugas zzz` | e2e/tasks.test.ts | gmsg(tasks, default, {state nomatch, filter zzz}, id) |
+| tasks | handleCommandText (isi) | `/tasks` dengan 2 tugas, 1 selesai | e2e/tasks.test.ts | gmsg(tasks, default, {state list, done 1, total 2, tasks [✅ [1], ⬜ [2]]}, id) |
+| tasks | handleCommandArgsText | `/tasks susu` | e2e/tasks.test.ts | hanya tugas yang cocok tampil |
+| tasks | handleCommandArgsText (tak cocok) | `/tasks zzz` | e2e/tasks.test.ts | gmsg(tasks, default, {state nomatch, filter zzz}, id) |
 | tasks | handleCallbackQueryData | tombol Tasks dari /start | e2e/tasks.test.ts | editMessageText + "[1] Beli susu" |
-| addtask | handleCommandArgsText | `/tambahtugas Beli susu di warung` | e2e/addtask.test.ts | gmsg(addtask, default, {state added, id 1}, id) + DB 1 tugas |
+| addtask | handleCommandArgsText | `/addtask Beli susu di warung` | e2e/addtask.test.ts | gmsg(addtask, default, {state added, id 1}, id) + DB 1 tugas |
 | addtask | handleCommandArgsText (EN) | `/addtask Buy milk` (user en) | e2e/addtask.test.ts | gmsg(addtask, default, {state added, id 1}, en) + DB 1 tugas |
-| addtask | handleCommandText | `/tambahtugas` tanpa argumen | e2e/addtask.test.ts | gmsg(addtask, default, {state prompt}, id) + DB tetap 0 |
+| addtask | handleCommandText | `/addtask` tanpa argumen | e2e/addtask.test.ts | gmsg(addtask, default, {state prompt}, id) + DB tetap 0 |
 | addtask | handleCommandArgsText (id naik) | tugas kedua | e2e/addtask.test.ts | balasan memuat "[2] Dua" |
-| done | handleCommandArgsText | `/selesai 1` | e2e/done.test.ts | gmsg(done, default, {state ok, id 1}, id) + DB done=true |
+| done | handleCommandArgsText | `/done 1` | e2e/done.test.ts | gmsg(done, default, {state ok, id 1}, id) + DB done=true |
 | done | handleCommandArgsText (EN) | `/done 1` (user en) | e2e/done.test.ts | gmsg(done, default, {state ok, id 1}, en) + DB done=true |
-| done | handleCommandArgsText (id tak ada) | `/selesai 99` | e2e/done.test.ts | gmsg(done, default, {state notfound, id 99}, id) |
-| done | handleCommandArgsText (sudah selesai) | `/selesai 1` kedua kali | e2e/done.test.ts | gmsg(done, default, {state already, id 1}, id) |
-| done | handleCommandArgsText (bukan angka) | `/selesai abc` | e2e/done.test.ts | gmsg(done, default, {state invalid, raw abc}, id) |
-| done | handleCommandText | `/selesai` tanpa argumen | e2e/done.test.ts | gmsg(done, default, {state prompt}, id) |
+| done | handleCommandArgsText (id tak ada) | `/done 99` | e2e/done.test.ts | gmsg(done, default, {state notfound, id 99}, id) |
+| done | handleCommandArgsText (sudah selesai) | `/done 1` kedua kali | e2e/done.test.ts | gmsg(done, default, {state already, id 1}, id) |
+| done | handleCommandArgsText (bukan angka) | `/done abc` | e2e/done.test.ts | gmsg(done, default, {state invalid, raw abc}, id) |
+| done | handleCommandText | `/done` tanpa argumen | e2e/done.test.ts | gmsg(done, default, {state prompt}, id) |
 | contact | handleCallbackQueryData | tombol Contacts dari /start | e2e/contact.test.ts | editMessageText + "👤 Budi" |
-| contact | handleCommandText | `/kontak` kosong | e2e/contact.test.ts | gmsg(contact, default, {state empty}, id) |
+| contact | handleCommandText | `/contact` kosong | e2e/contact.test.ts | gmsg(contact, default, {state empty}, id) |
 | contact | handleCommandText (EN) | `/contact` kosong | e2e/contact.test.ts | gmsg(contact, default, {state empty}, en) |
-| contact | handleCommandText (isi) | `/kontak` dengan 1 kontak | e2e/contact.test.ts | gmsg(contact, default, {state list, contacts [Budi + email + telepon]}, id) |
-| contact | handleCommandArgsText | `/kontak sari` | e2e/contact.test.ts | hanya Sari tampil, Budi tidak |
-| contact | handleCommandArgsText (tak cocok) | `/kontak zzz` | e2e/contact.test.ts | gmsg(contact, default, {state nomatch, query zzz}, id) |
-| addcontact | handleCommandArgsText | `/tambahkontak Budi` + email + telepon | e2e/addcontact.test.ts | gmsg(addcontact, default, {state saved, name Budi, extra}, id) + DB email benar |
+| contact | handleCommandText (isi) | `/contact` dengan 1 kontak | e2e/contact.test.ts | gmsg(contact, default, {state list, contacts [Budi + email + telepon]}, id) |
+| contact | handleCommandArgsText | `/contact sari` | e2e/contact.test.ts | hanya Sari tampil, Budi tidak |
+| contact | handleCommandArgsText (tak cocok) | `/contact zzz` | e2e/contact.test.ts | gmsg(contact, default, {state nomatch, query zzz}, id) |
+| addcontact | handleCommandArgsText | `/addcontact Budi` + email + telepon | e2e/addcontact.test.ts | gmsg(addcontact, default, {state saved, name Budi, extra}, id) + DB email benar |
 | addcontact | handleCommandArgsText (EN) | `/addcontact Budi` + email + telepon (user en) | e2e/addcontact.test.ts | gmsg(addcontact, default, {state saved}, en) + DB 1 kontak |
-| addcontact | handleCommandArgsText (nama saja) | `/tambahkontak Sari` | e2e/addcontact.test.ts | "✅ Kontak disimpan: Sari" + phone undefined |
-| addcontact | handleCommandArgsText (tanpa nama) | `/tambahkontak` dengan nama kosong (hanya email) | e2e/addcontact.test.ts | gmsg(addcontact, default, {state noname}, id) + DB tetap 0 |
-| addcontact | handleCommandText | `/tambahkontak` tanpa argumen | e2e/addcontact.test.ts | gmsg(addcontact, default, {state prompt}, id) + DB tetap 0 |
+| addcontact | handleCommandArgsText (nama saja) | `/addcontact Sari` | e2e/addcontact.test.ts | "✅ Kontak disimpan: Sari" + phone undefined |
+| addcontact | handleCommandArgsText (tanpa nama) | `/addcontact` dengan nama kosong (hanya email) | e2e/addcontact.test.ts | gmsg(addcontact, default, {state noname}, id) + DB tetap 0 |
+| addcontact | handleCommandText | `/addcontact` tanpa argumen | e2e/addcontact.test.ts | gmsg(addcontact, default, {state prompt}, id) + DB tetap 0 |
 | email | handleCommandText | `/email` tanpa token Google | e2e/email.test.ts | gmsg(email, default, {state noconnect, code no-token}, id) |
 | email | handleCommandText (EN) | `/email` tanpa token (user en) | e2e/email.test.ts | gmsg(email, default, {state noconnect, code no-token}, en) |
 | email | handleCallbackQueryData | tombol Email dari /start | e2e/email.test.ts | editMessageText + "Google belum terhubung" |
 | email | handleCommandText (isi, fetch stub) | `/email` dengan token + stub fetch 1 email | e2e/email.test.ts | gmsg(email, default, {state list, count 1, items [Rapat besok]}, id) |
-| schedule | handleCommandText | `/jadwal` tanpa token Google | e2e/schedule.test.ts | gmsg(schedule, default, {state noconnect, code no-token}, id) |
+| schedule | handleCommandText | `/schedule` tanpa token Google | e2e/schedule.test.ts | gmsg(schedule, default, {state noconnect, code no-token}, id) |
 | schedule | handleCommandText (EN) | `/schedule` tanpa token (user en) | e2e/schedule.test.ts | gmsg(schedule, default, {state noconnect, code no-token}, en) |
-| schedule | handleCommandArgsText | `/jadwal besok` tanpa token | e2e/schedule.test.ts | balasan memuat "Google belum terhubung" |
+| schedule | handleCommandArgsText | `/schedule besok` tanpa token | e2e/schedule.test.ts | balasan memuat "Google belum terhubung" |
 | schedule | handleCallbackQueryData | tombol Schedule dari /start | e2e/schedule.test.ts | editMessageText + "Google belum terhubung" |
-| schedule | handleCommandText (isi, fetch stub) | `/jadwal` dengan token + stub fetch 1 acara | e2e/schedule.test.ts | gmsg(schedule, default, {state list, count 1, items [09:00–10:00 Rapat tim @ Ruang A]}, id) |
-| forget | handleCommandText | `/lupakan` setelah 1 turn | e2e/forget.test.ts | gmsg(forget, default, {}, id) + memory 0 baris |
-| forget | handleCommandText (lupa permanen) | "Apa yang aku suka?" setelah /lupakan | e2e/forget.test.ts | balasan "belum pernah cerita soal kesukaanmu" |
+| schedule | handleCommandText (isi, fetch stub) | `/schedule` dengan token + stub fetch 1 acara | e2e/schedule.test.ts | gmsg(schedule, default, {state list, count 1, items [09:00–10:00 Rapat tim @ Ruang A]}, id) |
+| forget | handleCommandText | `/forget` setelah 1 turn | e2e/forget.test.ts | gmsg(forget, default, {}, id) + memory 0 baris |
+| forget | handleCommandText (lupa permanen) | "Apa yang aku suka?" setelah /forget | e2e/forget.test.ts | balasan "belum pernah cerita soal kesukaanmu" |
 | language | handleCommandText | `/language` (user EN) | e2e/language.test.ts | sendMessage + gmsg(language, show, {}, en) + keyboard [🇬🇧 English, 🇮🇩 Indonesia, ⬅️ Back] |
 | language | handleCommandText (varian id) | `/language` (user id) | e2e/language.test.ts | sendMessage + gmsg(language, show, {}, id) + keyboard [🇬🇧 English, 🇮🇩 Indonesia, ⬅️ Kembali] |
 | language | handleCallbackQueryData | tombol Language dari /start | e2e/language.test.ts | editMessageText + gmsg(language, show, {}, en) |
@@ -86,21 +88,22 @@ StatusPage tidak punya `handle*` sendiri — ia dirender lewat hook
 | language | handleArgsCallbackQueryData (lang-en) | callback `lang-en` setelah id | e2e/language.test.ts | editMessageText + gmsg(language, done, {lang: English}, en) + /start berikutnya berbahasa Inggris |
 | language | handleArgsCallbackQueryData (balasan Angie ikut bahasa) | teks bebas setelah pilih id | e2e/language.test.ts | balasan mock 'Kamu bilang: "halo"' (Indonesia) |
 | language | handleCommandText (default EN, user baru) | teks bebas tanpa pilihan bahasa | e2e/language.test.ts | balasan mock 'You said: "hello"' (English default) |
-| tasks | handleCommandText (intent EN) | `/tasks` (user en) | e2e/commands-lang.test.ts | sendMessage "You have no tasks yet" |
-| tasks | handleCommandText (intent ID) | `/tugas` (user id) | e2e/commands-lang.test.ts | sendMessage "Kamu belum punya tugas" |
-| addtask | handleCommandArgsText (intent EN) | `/addtask Buy milk` (user en) | e2e/commands-lang.test.ts | sendMessage "✅ Task added: [1] Buy milk" + DB 1 tugas |
-| addtask | handleCommandArgsText (intent ID) | `/tambahtugas Beli susu` (user id) | e2e/commands-lang.test.ts | sendMessage "✅ Tugas ditambahkan: [1] Beli susu" + DB 1 tugas |
-| done | handleCommandArgsText (intent EN) | `/done 1` (user en) | e2e/commands-lang.test.ts | sendMessage "✅ Task [1] done" + DB done=true |
-| done | handleCommandArgsText (intent ID) | `/selesai 1` (user id) | e2e/commands-lang.test.ts | sendMessage "✅ Tugas [1] selesai" + DB done=true |
-| contact | handleCommandText (intent EN) | `/contact` (user en) | e2e/commands-lang.test.ts | sendMessage "You have not saved any contacts yet" |
-| contact | handleCommandText (intent ID) | `/kontak` (user id) | e2e/commands-lang.test.ts | sendMessage "Kamu belum menyimpan kontak" |
-| addcontact | handleCommandArgsText (intent EN) | `/addcontact Budi` + email (user en) | e2e/commands-lang.test.ts | sendMessage "✅ Contact saved: Budi" + DB 1 kontak |
-| addcontact | handleCommandArgsText (intent ID) | `/tambahkontak Sari` + email (user id) | e2e/commands-lang.test.ts | sendMessage "✅ Kontak disimpan: Sari" + DB 1 kontak |
-| schedule | handleCommandText (intent EN) | `/schedule` (user en) | e2e/commands-lang.test.ts | sendMessage "Without that token I cannot read your calendar" |
-| schedule | handleCommandText (intent ID) | `/jadwal` (user id) | e2e/commands-lang.test.ts | sendMessage "Tanpa token itu aku tidak bisa membaca kalendermu" |
-| forget | handleCommandText (intent EN) | `/forget` (user en) | e2e/commands-lang.test.ts | sendMessage "Forgotten." + memory 0 baris |
-| forget | handleCommandText (intent ID) | `/lupakan` (user id) | e2e/commands-lang.test.ts | sendMessage "Sudah kulupakan." + memory 0 baris |
-| contact | handleCommandText (botLang tersimpan) | `/kontak` + `/contact` (language_code en, botLang id) | e2e/commands-lang.test.ts | kedua alias routing ke halaman yang sama + render bahasa Indonesia |
+| tasks | handleCommandText (command EN, render EN) | `/tasks` (user en) | e2e/commands-lang.test.ts | sendMessage "You have no tasks yet" |
+| tasks | handleCommandText (command EN, render ID) | `/tasks` (user id) | e2e/commands-lang.test.ts | sendMessage "Kamu belum punya tugas" |
+| addtask | handleCommandArgsText (command EN, render EN) | `/addtask Buy milk` (user en) | e2e/commands-lang.test.ts | sendMessage "✅ Task added: [1] Buy milk" + DB 1 tugas |
+| addtask | handleCommandArgsText (command EN, render ID) | `/addtask Beli susu` (user id) | e2e/commands-lang.test.ts | sendMessage "✅ Tugas ditambahkan: [1] Beli susu" + DB 1 tugas |
+| done | handleCommandArgsText (command EN, render EN) | `/done 1` (user en) | e2e/commands-lang.test.ts | sendMessage "✅ Task [1] done" + DB done=true |
+| done | handleCommandArgsText (command EN, render ID) | `/done 1` (user id) | e2e/commands-lang.test.ts | sendMessage "✅ Tugas [1] selesai" + DB done=true |
+| contact | handleCommandText (command EN, render EN) | `/contact` (user en) | e2e/commands-lang.test.ts | sendMessage "You have not saved any contacts yet" |
+| contact | handleCommandText (command EN, render ID) | `/contact` (user id) | e2e/commands-lang.test.ts | sendMessage "Kamu belum menyimpan kontak" |
+| addcontact | handleCommandArgsText (command EN, render EN) | `/addcontact Budi` + email (user en) | e2e/commands-lang.test.ts | sendMessage "✅ Contact saved: Budi" + DB 1 kontak |
+| addcontact | handleCommandArgsText (command EN, render ID) | `/addcontact Sari` + email (user id) | e2e/commands-lang.test.ts | sendMessage "✅ Kontak disimpan: Sari" + DB 1 kontak |
+| schedule | handleCommandText (command EN, render EN) | `/schedule` (user en) | e2e/commands-lang.test.ts | sendMessage "Without that token I cannot read your calendar" |
+| schedule | handleCommandText (command EN, render ID) | `/schedule` (user id) | e2e/commands-lang.test.ts | sendMessage "Tanpa token itu aku tidak bisa membaca kalendermu" |
+| forget | handleCommandText (command EN, render EN) | `/forget` (user en) | e2e/commands-lang.test.ts | sendMessage "Forgotten." + memory 0 baris |
+| forget | handleCommandText (command EN, render ID) | `/forget` (user id) | e2e/commands-lang.test.ts | sendMessage "Sudah kulupakan." + memory 0 baris |
+| contact | handleCommandText (botLang tersimpan) | `/contact` (language_code en, botLang id) | e2e/commands-lang.test.ts | command Inggris routing + render bahasa Indonesia (botLang memilih bahasa render) |
+| status | hookNotFoundPage (command ID mati) | `/tugas`, `/tambahtugas`, `/selesai`, `/kontak`, `/tambahkontak`, `/jadwal`, `/lupakan` (user en + id) | e2e/commands-lang.test.ts | sendMessage "Route Not Found" / "Rute Tidak Ditemukan", TIDAK ada isi page |
 | core | executeSyncBlocksDescription (g-description) | bot start (e2e: panggil langsung) | e2e/descriptions.test.ts | 2x setMyCommands (default EN + language_code id), 11 command unik tiap bahasa, deskripsi EN/ID persis |
 | core | getGDescription (template manager) | langsung via bot.templateManager | e2e/descriptions.test.ts | semua 11 deskripsi EN + ID terbaca dari template tiap page |
 | status | hookNotFoundPage (callback tak dikenal) | callback `nonexistent-callback-data` | e2e/status.test.ts | editMessageText + gmsg(status, nf, {}, id) |

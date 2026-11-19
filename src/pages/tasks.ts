@@ -1,14 +1,14 @@
 import {PageBase} from "~/base/page"
 
 /**
- * /tasks (EN) / /tugas (ID) — the task list from LMDB.
+ * /tasks — the task list from LMDB.
  *
  * All words live in `static template` (EN default + `lang="id"` variant);
  * the helper only computes data: the render `state`, the row list, and the
  * counts. Strict rule (Damar 2026-11-19 ~14:43 WIB): no string dictionary.
  */
 export class TasksPage extends PageBase {
-  static data = this.buildData({intentCommandText: {default: `tasks`, id: `tugas`}})
+  static data = this.buildData()
 
   async handleCallbackQueryData() {
     await this.gdefault.show()
@@ -54,22 +54,22 @@ export class TasksPage extends PageBase {
       <g-description lang="id">Lihat daftar tugasmu</g-description>
       <g-message>
         <g-switch value="state">
-          <g-case is="empty">You have no tasks yet. Add one with /tambahtugas &lt;text&gt; — example: /tambahtugas Buy milk.</g-case>
+          <g-case is="empty">You have no tasks yet. Add one with /addtask &lt;text&gt; — example: /addtask Buy milk.</g-case>
           <g-case is="nomatch">No tasks match "{{filter}}".</g-case>
           <g-default>📋 Your tasks ({{done}}/{{total}} done):
 <g-map src="tasks" join="\\n">{{e.icon}} [{{e.id}}] {{e.title}}</g-map>
 
-Mark one done with /selesai &lt;id&gt; — example: /selesai 1.</g-default>
+Mark one done with /done &lt;id&gt; — example: /done 1.</g-default>
         </g-switch>
       </g-message>
       <g-message lang="id">
         <g-switch value="state">
-          <g-case is="empty">Kamu belum punya tugas. Tambah dengan /tambahtugas &lt;teks&gt; — contoh: /tambahtugas Beli susu.</g-case>
+          <g-case is="empty">Kamu belum punya tugas. Tambah dengan /addtask &lt;teks&gt; — contoh: /addtask Beli susu.</g-case>
           <g-case is="nomatch">Tidak ada tugas yang cocok dengan "{{filter}}".</g-case>
           <g-default>📋 Tugasmu ({{done}}/{{total}} selesai):
 <g-map src="tasks" join="\\n">{{e.icon}} [{{e.id}}] {{e.title}}</g-map>
 
-Selesaikan dengan /selesai &lt;id&gt; — contoh: /selesai 1.</g-default>
+Selesaikan dengan /done &lt;id&gt; — contoh: /done 1.</g-default>
         </g-switch>
       </g-message>
     </g-base>

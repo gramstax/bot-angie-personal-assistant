@@ -1,14 +1,14 @@
 import {PageBase} from "~/base/page"
 
 /**
- * /forget (EN) / /lupakan (ID) — clear this user's conversation memory (window buffer) from LMDB.
+ * /forget — clear this user's conversation memory (window buffer) from LMDB.
  *
  * The confirmation sentence lives in `static template` (EN default +
  * `lang="id"` variant). Strict rule (Damar 2026-11-19 ~14:43 WIB):
  * no string dictionary.
  */
 export class ForgetPage extends PageBase {
-  static data = this.buildData({intentCommandText: {default: `forget`, id: `lupakan`}})
+  static data = this.buildData()
 
   async handleCommandText() {
     await this.gdefault.show()
