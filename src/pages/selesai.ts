@@ -1,9 +1,9 @@
 import {PageBase} from "~/base/page"
 import {I18n} from "~/lib/i18n"
 
-/** /selesai <id> — mark one task done in LMDB. */
+/** /done (EN) / /selesai (ID) <id> — mark one task done in LMDB. */
 export class SelesaiPage extends PageBase {
-  static data = this.buildData()
+  static data = this.buildData({intentCommandText: {default: `done`, id: `selesai`}})
 
   async handleCommandText() {
     await this.gdefault.show()

@@ -1,9 +1,9 @@
 import {PageBase} from "~/base/page"
 import {I18n} from "~/lib/i18n"
 
-/** /tugas — the task list from LMDB. */
+/** /tasks (EN) / /tugas (ID) — the task list from LMDB. */
 export class TugasPage extends PageBase {
-  static data = this.buildData()
+  static data = this.buildData({intentCommandText: {default: `tasks`, id: `tugas`}})
 
   async handleCallbackQueryData() {
     await this.gdefault.show()

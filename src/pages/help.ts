@@ -32,16 +32,18 @@ export class HelpPage extends PageBase {
         even if the bot restarts.
 
         <b>Commands</b>
+        Every command works in English and Indonesian — both spellings
+        open the same page (e.g. /tasks and /tugas).
         /start — introduction &amp; main menu
-        /tugas — your task list
-        /tambahtugas &lt;text&gt; — add a new task
-        /selesai &lt;id&gt; — mark a task done
-        /kontak [name] — find a contact
-        /tambahkontak &lt;name&gt; | &lt;email&gt; | &lt;phone&gt; — add a contact
+        /tasks — your task list (also /tugas)
+        /addtask &lt;text&gt; — add a new task (also /tambahtugas)
+        /done &lt;id&gt; — mark a task done (also /selesai)
+        /contact [name] — find a contact (also /kontak)
+        /addcontact &lt;name&gt; | &lt;email&gt; | &lt;phone&gt; — add a contact (also /tambahkontak)
         /email — today's unread emails (not promotions)
-        /jadwal [date] — events for that day (example: /jadwal tomorrow)
+        /schedule [date] — events for that day (example: /schedule tomorrow)
         /language — switch language (English / Indonesia)
-        /lupakan — erase my memory of this chat
+        /forget — erase my memory of this chat (also /lupakan)
         /help — this page
 
         <b>What to set up so every feature works</b>
@@ -59,16 +61,18 @@ export class HelpPage extends PageBase {
         jadi konteksnya tidak hilang walau bot restart.
 
         <b>Perintah</b>
+        Setiap perintah bisa dipakai dalam bahasa Inggris dan Indonesia —
+        kedua ejaannya membuka halaman yang sama (mis. /tugas dan /tasks).
         /start — perkenalan &amp; menu utama
-        /tugas — daftar tugasmu
-        /tambahtugas &lt;teks&gt; — tambah tugas baru
-        /selesai &lt;id&gt; — tandai tugas selesai
-        /kontak [nama] — cari kontak
-        /tambahkontak &lt;nama&gt; | &lt;email&gt; | &lt;telepon&gt; — tambah kontak
+        /tugas — daftar tugasmu (juga /tasks)
+        /tambahtugas &lt;teks&gt; — tambah tugas baru (juga /addtask)
+        /selesai &lt;id&gt; — tandai tugas selesai (juga /done)
+        /kontak [nama] — cari kontak (juga /contact)
+        /tambahkontak &lt;nama&gt; | &lt;email&gt; | &lt;telepon&gt; — tambah kontak (juga /addcontact)
         /email — email unread hari ini (bukan promo)
         /jadwal [tanggal] — acara hari itu (contoh: /jadwal besok)
         /language — ganti bahasa (English / Indonesia)
-        /lupakan — hapus ingatanku tentang obrolan ini
+        /lupakan — hapus ingatanku tentang obrolan ini (juga /forget)
         /help — halaman ini
 
         <b>Yang perlu disiapkan supaya semua fitur jalan</b>

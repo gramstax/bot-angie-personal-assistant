@@ -11,7 +11,9 @@ The generated project is Bun-only: `gramstax start`, the test suite, and the bui
 ![Telegram](https://img.shields.io/badge/Telegram-26A5E4.svg?style=flat&logo=telegram&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-## Features
+> 🚀 **Need a custom Telegram bot?** I build Telegram bots with Gramstax — text, voice, AI agents, and integrations, tailored to your workflow. Talk to me on Telegram: [@damartripamungkas](https://t.me/damartripamungkas).
+
+## ✨ Features
 
 - 🧩 **Page-based routing**: each screen is a class with `show`/`process` steps, inline keyboards, and session state
 - 🎨 **Template engine**: rich messages, `lang` variants, and multi-language keyboards (English default, Indonesian via `/language`)
@@ -21,7 +23,7 @@ The generated project is Bun-only: `gramstax start`, the test suite, and the bui
 - ✅ **E2E tested**: in-process harness asserts every Telegram API call (`e2e/` mirrors `src/pages/`)
 - 🛡️ **Guards, throttling & metrics**: AllowList route guard, rate limits, and a status server out of the box
 
-## Flow
+## 🔀 Flow
 
 ```mermaid
 flowchart TD
@@ -47,7 +49,7 @@ flowchart TD
     MEM_WRITE --> REPLY[Reply in Telegram<br/>Markdown, user language]
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Install dependencies
 
@@ -78,25 +80,30 @@ bun run start
 
 Open Telegram, find your bot, and send `/start`.
 
-## Commands
+## ⌨️ Commands
 
-| Command | Description |
-| :------ | :---------- |
+Every command works in English and Indonesian. Both spellings open the
+same page — one page, one `intentCommandText` map, no duplicate files.
+Commands that are identical in both languages (`/start`, `/help`,
+`/email`, `/language`, `/status`) use the page name as the command.
+
+| Command (EN / ID) | Description |
+| :---------------- | :---------- |
 | `/start` | Introduction and main menu (Tasks, Contacts, Email, Schedule, Language, Help) |
 | `/help` | Full help |
 | `/language` | Switch language — English / Indonesia (stored per user in LMDB) |
-| `/tugas` | List your tasks |
-| `/tambahtugas <text>` | Add a new task |
-| `/selesai <id>` | Mark a task done |
-| `/kontak [name]` | Find a contact |
-| `/tambahkontak <name> \| <email> \| <phone>` | Add a contact |
+| `/tasks` / `/tugas` | List your tasks |
+| `/addtask <text>` / `/tambahtugas <text>` | Add a new task |
+| `/done <id>` / `/selesai <id>` | Mark a task done |
+| `/contact [name]` / `/kontak [name]` | Find a contact |
+| `/addcontact <name> \| <email> \| <phone>` / `/tambahkontak <name> \| <email> \| <phone>` | Add a contact |
 | `/email` | Today's unread emails (not promotions) |
-| `/jadwal [date]` | Events for that day (e.g. `/jadwal tomorrow`, `/jadwal 2026-12-25`) |
-| `/lupakan` | Erase Angie's memory of this chat |
+| `/schedule [date]` / `/jadwal [date]` | Events for that day (e.g. `/schedule tomorrow`, `/jadwal 2026-12-25`) |
+| `/forget` / `/lupakan` | Erase Angie's memory of this chat |
 
 Any other text — or a voice note — goes straight to Angie. She remembers the last 10 messages of your chat.
 
-## Scripts
+## 📜 Scripts
 
 | Script | Description |
 | :----- | :---------- |
@@ -109,7 +116,7 @@ Any other text — or a voice note — goes straight to Angie. She remembers the
 | `test:e2e:check` | Run the mirror check + coverage ledger audit |
 | `test:all` | Run the e2e checks, then unit + e2e tests |
 
-## Project Structure
+## 🗂️ Project Structure
 
 ```
 ├── AGENTS.md          # agent instructions for this app (incl. the strict recreate rules)
@@ -136,7 +143,7 @@ Keep shared interfaces in `src/types/<domain>.ts` rather than declaring them inl
 
 New page? Create `src/pages/my-page.ts`, `e2e/my-page.test.ts`, and a row for every handler in `e2e/COVERAGE.md`. The mirror is enforced by `scripts/check-e2e-mirror.ts`; the handler/test ledger is enforced by `scripts/check-e2e-handlers.ts`.
 
-## Configuration
+## ⚙️ Configuration
 
 All settings live in `.env` and are wired through `gramstax.config.ts`. `gramstax start` and `gramstax build` load project-root `.env*` files automatically, with shell variables taking precedence:
 
@@ -151,7 +158,7 @@ All settings live in `.env` and are wired through `gramstax.config.ts`. `gramsta
 | `ANGIE_ALLOWED_IDS` | No | AllowList: Telegram IDs allowed to use the bot, comma-separated. Empty = everyone allowed (dev mode) |
 | `ANGIE_MOCK_AI` | No | `1` forces mock answers even when `OPENAI_API_KEY` is set (used by e2e) |
 
-## Language
+## 🌐 Language
 
 The bot is bilingual — English by default, Indonesian per user.
 
@@ -159,7 +166,7 @@ The bot is bilingual — English by default, Indonesian per user.
 - **Dynamic / logic strings** (tool results, runtime errors, Angie's mock replies) go through the per-user language dictionary in `src/lib/i18n.ts`, resolved from the stored preference.
 - The preference is stored per user in LMDB (`UserSchema.botLang`, appended last in the schema — LMDB encoding is positional) and set with `/language`. It is applied in `hookBeforeRoute` by overriding `from.language_code`. A non-string stored value falls back to English and never crashes.
 
-## Testing
+## 🧪 Testing
 
 ```bash
 bun run test            # fast unit tests for helpers, stores, validation
@@ -170,24 +177,24 @@ bun run test:all        # the checks, then everything, as CI runs it
 
 E2E tests drive the real bot in-process (`deploy: test`) and assert every Telegram API call: message text, keyboards, media, edits, and call order. `e2e/COVERAGE.md` is the ledger: one row per handler, state, or hook-driven page, pointing at the test that proves it. The audit fails when a page handler or test file has no row.
 
-## Deployment
+## 🚢 Deployment
 
 - **Development**: `BOT_DEPLOY=polling`, then `bun run dev`.
 - **Production (webhook)**: set `BOT_DEPLOY=webhook` and put your public URL in `optionsDeploy` in `gramstax.config.ts`, then run `bun run start` behind a process manager.
 - **Serverless**: set `deploy` to `serverless` with `optionsDeploy` (`adapter` + `url`), run `bun run build:gramstax`, and deploy `.gramstax/server/` per the Gramstax serverless guide.
 
-## Honest limitations — read before going live
+## ⚠️ Honest limitations — read before going live
 
 - **The live path (OpenAI + Google) is untested** — no `BOT_TOKEN`, `OPENAI_API_KEY`, or Google OAuth has been provided yet. What tests prove is: the Gramstax 6.1.0 scaffold, LMDB (user/memory/task/contact), the 2-thread worker pool (round-robin, mock transcription), mock AI + tool routing, and every command/page via the e2e harness. Do not claim live works before tokens are set and tested with a real bot.
 - **The worker pool must launch sequentially, not with `Promise.all`**: parallel launches race on the export state — a probe showed only 1 thread alive; sequential launches give 2 threads (see `src/lib/transcribe-pool.ts`).
-- **A page file name is its route/command**: `src/pages/tasks.ts` would produce `/tasks`, not `/tugas` — that is why the task file is named `tugas.ts`.
+- **A page file name is its default route/command**: the task file is named `tugas.ts`, so `/tugas` works out of the box — `/tasks` is added with an `intentCommandText` map on the same page, not a second file.
 - **Rendering from a message uses `sendMessage`**, not `sendRichMessage`, in Gramstax 6.1.0 — the e2e tests follow this.
-- **A Google access token can expire**: the adapter uses the Bearer token from env as-is; there is no auto-refresh yet (the refresh token is optional and not implemented — set a fresh access token when it expires).
+- **Google access tokens expire.** The adapter uses the Bearer token from env as-is — there is no auto-refresh. Set a fresh access token when it expires.
 - A live voice note is downloaded via `api.telegram.org/file/bot<token>/...` and sent to Whisper as OGG; the Telegram Bot API caps files at 20 MB.
 - Memory window: the last 10 turns per user; `/lupakan` clears it.
 - AllowList: when `ANGIE_ALLOWED_IDS` is set, users outside the list get a rejection message and their update is rejected in `hookBeforeRoute`.
 
-## Tech Stack
+## 🧱 Tech Stack
 
 - [Gramstax](https://github.com/gramstax/gramstax): declarative Telegram bot framework with template-driven pages
 - [@gramstax/lmdb](https://github.com/gramstax/gramstax): LMDB-backed storage (users, memory, tasks, contacts)
@@ -195,12 +202,12 @@ E2E tests drive the real bot in-process (`deploy: test`) and assert every Telegr
 - [Bun](https://bun.sh): runtime, test runner, and bundler
 - TypeScript 7 in strict mode
 
-## Learn More
+## 📚 Learn More
 
 - [Gramstax Documentation](https://gramstax.mintlify.site)
 - [Gramstax Repository](https://github.com/gramstax/gramstax)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
 
-## License
+## 📄 License
 
 MIT

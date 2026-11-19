@@ -1,9 +1,9 @@
 import {PageBase} from "~/base/page"
 import {I18n} from "~/lib/i18n"
 
-/** /lupakan — clear this user's conversation memory (window buffer) from LMDB. */
+/** /forget (EN) / /lupakan (ID) — clear this user's conversation memory (window buffer) from LMDB. */
 export class LupakanPage extends PageBase {
-  static data = this.buildData()
+  static data = this.buildData({intentCommandText: {default: `forget`, id: `lupakan`}})
 
   async handleCommandText() {
     await this.gdefault.show()

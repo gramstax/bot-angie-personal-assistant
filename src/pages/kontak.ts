@@ -1,9 +1,9 @@
 import {PageBase} from "~/base/page"
 import {I18n} from "~/lib/i18n"
 
-/** /kontak [name] — search/list contacts from LMDB. */
+/** /contact (EN) / /kontak (ID) [name] — search/list contacts from LMDB. */
 export class KontakPage extends PageBase {
-  static data = this.buildData()
+  static data = this.buildData({intentCommandText: {default: `contact`, id: `kontak`}})
 
   async handleCallbackQueryData() {
     await this.gdefault.show()

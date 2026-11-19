@@ -62,6 +62,21 @@ StatusPage tidak punya `handle*` sendiri — ia dirender lewat hook
 | language | handleArgsCallbackQueryData (lang-en) | callback `lang-en` setelah id | e2e/language.test.ts | editMessageText + gmsg(language, done, {lang: English}, en) + /start berikutnya berbahasa Inggris |
 | language | handleArgsCallbackQueryData (balasan Angie ikut bahasa) | teks bebas setelah pilih id | e2e/language.test.ts | balasan mock 'Kamu bilang: "halo"' (Indonesia) |
 | language | handleCommandText (default EN, user baru) | teks bebas tanpa pilihan bahasa | e2e/language.test.ts | balasan mock 'You said: "hello"' (English default) |
+| tugas | handleCommandText (intent EN) | `/tasks` (user en) | e2e/commands-i18n.test.ts | sendMessage "You have no tasks yet" |
+| tugas | handleCommandText (intent ID) | `/tugas` (user id) | e2e/commands-i18n.test.ts | sendMessage "Kamu belum punya tugas" |
+| tambahtugas | handleCommandArgsText (intent EN) | `/addtask Buy milk` (user en) | e2e/commands-i18n.test.ts | sendMessage "✅ Task added: [1] Buy milk" + DB 1 tugas |
+| tambahtugas | handleCommandArgsText (intent ID) | `/tambahtugas Beli susu` (user id) | e2e/commands-i18n.test.ts | sendMessage "✅ Tugas ditambahkan: [1] Beli susu" + DB 1 tugas |
+| selesai | handleCommandArgsText (intent EN) | `/done 1` (user en) | e2e/commands-i18n.test.ts | sendMessage "✅ Task [1] done" + DB done=true |
+| selesai | handleCommandArgsText (intent ID) | `/selesai 1` (user id) | e2e/commands-i18n.test.ts | sendMessage "✅ Tugas [1] selesai" + DB done=true |
+| kontak | handleCommandText (intent EN) | `/contact` (user en) | e2e/commands-i18n.test.ts | sendMessage "You have not saved any contacts yet" |
+| kontak | handleCommandText (intent ID) | `/kontak` (user id) | e2e/commands-i18n.test.ts | sendMessage "Kamu belum menyimpan kontak" |
+| tambahkontak | handleCommandArgsText (intent EN) | `/addcontact Budi` + email (user en) | e2e/commands-i18n.test.ts | sendMessage "✅ Contact saved: Budi" + DB 1 kontak |
+| tambahkontak | handleCommandArgsText (intent ID) | `/tambahkontak Sari` + email (user id) | e2e/commands-i18n.test.ts | sendMessage "✅ Kontak disimpan: Sari" + DB 1 kontak |
+| jadwal | handleCommandText (intent EN) | `/schedule` (user en) | e2e/commands-i18n.test.ts | sendMessage "Without that token I cannot read your calendar" |
+| jadwal | handleCommandText (intent ID) | `/jadwal` (user id) | e2e/commands-i18n.test.ts | sendMessage "Tanpa token itu aku tidak bisa membaca kalendermu" |
+| lupakan | handleCommandText (intent EN) | `/forget` (user en) | e2e/commands-i18n.test.ts | sendMessage "Forgotten." + memory 0 baris |
+| lupakan | handleCommandText (intent ID) | `/lupakan` (user id) | e2e/commands-i18n.test.ts | sendMessage "Sudah kulupakan." + memory 0 baris |
+| kontak | handleCommandText (botLang tersimpan) | `/kontak` + `/contact` (language_code en, botLang id) | e2e/commands-i18n.test.ts | kedua alias routing ke halaman yang sama + render bahasa Indonesia |
 | status | hookNotFoundPage (callback tak dikenal) | callback `nonexistent-callback-data` | e2e/status.test.ts | editMessageText + gmsg(status, nf) |
 | status | hookNotFoundPage (command tak dikenal) | `/does-not-exist` | e2e/status.test.ts | sendMessage + gmsg(status, nf) |
 | status | handleFreeText (teks bebas = Angie) | teks "halo angie" | e2e/status.test.ts | sendMessage balasan Angie, BUKAN gmsg(status, nf) |

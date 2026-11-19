@@ -1,9 +1,9 @@
 import {PageBase} from "~/base/page"
 import {I18n} from "~/lib/i18n"
 
-/** /tambahtugas <text> — add one task to LMDB. */
+/** /addtask (EN) / /tambahtugas (ID) <text> — add one task to LMDB. */
 export class TambahTugasPage extends PageBase {
-  static data = this.buildData()
+  static data = this.buildData({intentCommandText: {default: `addtask`, id: `tambahtugas`}})
 
   async handleCommandText() {
     await this.gdefault.show()

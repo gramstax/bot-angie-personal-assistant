@@ -19,7 +19,23 @@
    LMDB (`UserSchema.botLang`), changed with `/language`; follow
    `gramstax-best-practices`, `lmdb-best-practices`, and
    `worker-thread-best-practices` (6.1.0).
-6. **Multi-lang object = static template content messages ONLY.**
+6. **Bilingual command text via `intentCommandTextMap` (Damar,
+   2026-11-19 ~14:30 WIB).** Every command has an English (default) and
+   an Indonesian spelling that route to the SAME page — e.g. `/contact`
+   and `/kontak` both open `kontak.ts`. Declare it in the existing page
+   only, no new file:
+   `static data = this.buildData({intentCommandText: {default: "contact", id: "kontak"}})`.
+   Framework (Gramstax 6.1.0) registers ALL map values as route intents,
+   so both aliases route regardless of the user's language — the stored
+   `botLang` (applied by `hookBeforeRoute` before routing) selects the
+   RENDER language, not the routing. Commands identical in both
+   languages (`start`, `help`, `email`, `language`, `status`) keep the
+   `buildData()` default (intent falls back to the page name). The
+   free-text handler (`angie.ts`) is not a command — never force it into
+   one. E2E (skill `e2e-coverage.md`, "Intent variants"): send each
+   mapped intent with a fixture carrying that `language_code`
+   (`e2e/commands-i18n.test.ts`).
+7. **Multi-lang object = static template content messages ONLY.**
    Static template content (welcome, help, keyboards, language picker)
    MUST use Gramstax's built-in multi-lang object: `<g-message>` /
    `<g-keyboard>` blocks with a `lang="id"` variant plus the English
@@ -31,13 +47,30 @@
    (`src/lib/i18n.ts`, default English). The two mechanisms must not be
    mixed up: if a string lives in a template, it is a multi-lang object;
    if it is built by logic, it is `I18n.t`.
-7. **Repo names**: recreate projects start with `bot-*` + a
+8. **Repo names**: recreate projects start with `bot-*` + a
    representation of the flow (e.g. `bot-angie-personal-assistant`).
    `chad-bot*` is reserved for a LATER variant whose behavior is
    changed to not depend on third parties ("chad" = the programmer meme
    of fully automating without hassle).
-8. **Every recreate project MUST have `references/`** with the original
+9. **Every recreate project MUST have `references/`** with the original
    workflow's `.json` file.
+10. **No Gramstax ecosystem version in the repo description** (Damar,
+    2026-11-19 ~14:35 WIB). The description names Gramstax, never its
+    version number.
+11. **A repo name represents the PROJECT, not the original flow's name**
+    (Damar, 2026-11-19 ~14:35 WIB). Never rename a published repo to fix
+    a name — renaming breaks its URL. Get the name right at creation.
+12. **Recreate repos are PUBLIC from the start** (Damar, 2026-11-19
+    ~14:35 WIB) — this repo and every next one. Never create one private.
+13. **README language is firm, human, and clear** (Damar, 2026-11-19
+    ~14:35 WIB). Rewrite stiff or hesitant sentences; stay accurate and
+    honest — never claim a feature that does not exist.
+14. **Every README promotes the Telegram-bot service at the TOP**
+    (Damar, 2026-11-19 ~14:35 WIB): one short block right under the
+    title/badges, before Features, in English, linking Telegram
+    @damartripamungkas — placed to fit, never in the way.
+15. **Emoji on every README parent heading — `##` level ONLY** (Damar,
+    2026-11-19 ~14:35 WIB). Sub-headings (`###` and below) get no emoji.
 
 ## Angie — project notes (2026-11-19, replacing part of the scaffold)
 

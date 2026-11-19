@@ -4,9 +4,9 @@ import {GoogleService} from "~/lib/google"
 import {AppConfig} from "~/lib/config"
 import {I18n} from "~/lib/i18n"
 
-/** /jadwal [date] — Google Calendar events for one date. */
+/** /schedule (EN) / /jadwal (ID) [date] — Google Calendar events for one date. */
 export class JadwalPage extends PageBase {
-  static data = this.buildData()
+  static data = this.buildData({intentCommandText: {default: `schedule`, id: `jadwal`}})
 
   async handleCallbackQueryData() {
     await this.gdefault.show()

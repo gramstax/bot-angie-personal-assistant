@@ -1,9 +1,9 @@
 import {PageBase} from "~/base/page"
 import {I18n} from "~/lib/i18n"
 
-/** /tambahkontak <name> | <email> | <phone> — add one contact to LMDB. */
+/** /addcontact (EN) / /tambahkontak (ID) <name> | <email> | <phone> — add one contact to LMDB. */
 export class TambahKontakPage extends PageBase {
-  static data = this.buildData()
+  static data = this.buildData({intentCommandText: {default: `addcontact`, id: `tambahkontak`}})
 
   async handleCommandText() {
     await this.gdefault.show()

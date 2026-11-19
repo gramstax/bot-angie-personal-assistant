@@ -48,14 +48,14 @@ export class StartPage extends PageBase {
         Send me any message directly, or use the commands below.
 
         <b>Commands:</b>
-        /tugas — see your tasks
-        /tambahtugas &lt;text&gt; — add a task
-        /selesai &lt;id&gt; — mark a task done
-        /kontak — find a contact
+        /tasks — see your tasks (also /tugas)
+        /addtask &lt;text&gt; — add a task (also /tambahtugas)
+        /done &lt;id&gt; — mark a task done (also /selesai)
+        /contact — find a contact (also /kontak)
         /email — today's unread emails
-        /jadwal — today's events
+        /schedule — today's events (also /jadwal)
         /language — switch language (English / Indonesia)
-        /lupakan — erase my memory of this chat
+        /forget — erase my memory of this chat (also /lupakan)
         /help — full help
       </g-message>
       <g-message lang="id">
@@ -72,14 +72,14 @@ export class StartPage extends PageBase {
         Kirim pesan apa pun langsung ke aku, atau pakai perintah di bawah.
 
         <b>Perintah:</b>
-        /tugas — lihat tugasmu
-        /tambahtugas &lt;teks&gt; — tambah tugas
-        /selesai &lt;id&gt; — tandai tugas selesai
-        /kontak — cari kontak
+        /tugas — lihat tugasmu (juga /tasks)
+        /tambahtugas &lt;teks&gt; — tambah tugas (juga /addtask)
+        /selesai &lt;id&gt; — tandai tugas selesai (juga /done)
+        /kontak — cari kontak (juga /contact)
         /email — email unread hari ini
-        /jadwal — acara hari ini
+        /jadwal — acara hari ini (juga /schedule)
         /language — ganti bahasa (English / Indonesia)
-        /lupakan — hapus ingatanku tentang obrolan ini
+        /lupakan — hapus ingatanku tentang obrolan ini (juga /forget)
         /help — bantuan lengkap
       </g-message>
     </g-base>
