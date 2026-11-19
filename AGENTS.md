@@ -168,6 +168,29 @@
 - Render dari pesan memakai `sendMessage` (bukan `sendRichMessage`)
   di Gramstax 6.1.0 — tes e2e menyesuaikan ini.
 - `ANGIE_MOCK_AI=1` di `e2e/setup.ts`: e2e berjalan tanpa kunci live.
+- **AI model + base URL bisa di-set lewat `.env` (Damar, 2026-11-19
+  ~16:10 WIB).** `OPENAI_BASE_URL` (default `https://api.openai.com/v1`)
+  dan `OPENAI_MODEL` (default `gpt-4o-mini`) — provider apa pun yang
+  kompatibel dengan OpenAI bisa dipakai, termasuk yang gratis tanpa kunci
+  (Pollinations `https://text.pollinations.ai/openai`, model `openai`).
+  Aturan mock: `ANGIE_MOCK_AI=1` selalu mock; ada kunci = live; tanpa
+  kunci + base URL default = mock; tanpa kunci + base URL kustom = LIVE
+  tanpa kunci. Transkripsi suara memakai base URL yang sama dan model
+  `whisper-1` — provider tanpa dukungan `/audio/transcriptions`
+  (mis. Pollinations) gagal jujur, tanpa transkrip palsu. URL dibangun
+  lewat helper `OpenAIClient.chatCompletionsUrl` /
+  `audioTranscriptionsUrl` di `src/lib/openai.ts` — tidak ada URL
+  `api.openai.com` yang di-hardcode di `src/`.
+- **SELALU cek Mermaid flow di README.md (Damar, 2026-11-19 ~16:13
+  WIB)** — render/validasi sampai 0 error sebelum commit/push, jangan
+  sampai error/tidak tampil. Extract the ```mermaid block from
+  README.md and render it (one-off `mermaid` + `jsdom` validator in
+  `/tmp/mermaid-check/validate.mjs`, or `mermaid-cli` `mmdc` when
+  available) until parse is clean AND a real SVG is produced. Label
+  rules learned 2026-11-19: quote any node label containing `@` or
+  `"` (e.g. `POOL["TranscribePool<br/>@gramstax/worker-thread, ..."]`)
+  — unquoted `@` / `"` is a parse error. Render output stays in
+  `/tmp`, never committed.
 
 Guidance for coding agents working in this generated Gramstax app. Read `README.md`, `package.json`, `gramstax.config.ts`, and the actual source before changing behavior.
 

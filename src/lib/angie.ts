@@ -61,7 +61,7 @@ export interface IAngieReply {
   lines: string[]
   /** Names of the tools used on this turn (empty when none were used). */
   toolsUsed: string[]
-  /** `openai` = live GPT-4o-mini, `mock` = ANGIE_MOCK_AI mode / no key. */
+  /** `openai` = live AI provider (model + base URL from env), `mock` = ANGIE_MOCK_AI mode / no key. */
   via: `openai` | `mock`
 }
 
@@ -111,13 +111,14 @@ const TOOLS: IChatTool[] = [
 
 /**
  * Angie — the conversation core. Flow: text/voice -> persistent window
- * buffer memory (LMDB) -> AI agent GPT-4o-mini + 4 tools (email, calendar,
- * tasks, contacts) -> reply.
+ * buffer memory (LMDB) -> AI agent (model + base URL from env, default
+ * GPT-4o-mini) + 4 tools (email, calendar, tasks, contacts) -> reply.
  *
- * Mock mode (ANGIE_MOCK_AI=1 or no OPENAI_API_KEY): NO OpenAI calls —
- * deterministic structured replies from LMDB data + memory, so e2e can
- * prove the flow without keys. Google tools are still called as-is: without
- * a GOOGLE_ACCESS_TOKEN they answer "not connected", never fake data.
+ * Mock mode (ANGIE_MOCK_AI=1, or no OPENAI_API_KEY with the default base
+ * URL): NO AI calls — deterministic structured replies from LMDB data +
+ * memory, so e2e can prove the flow without keys. Google tools are still
+ * called as-is: without a GOOGLE_ACCESS_TOKEN they answer "not
+ * connected", never fake data.
  */
 export class AngieService {
   /**
@@ -243,12 +244,13 @@ export class AngieService {
   static async chat(db: Db, userId: number, text: string, lang: Lang = `en`, now = new Date()): Promise<IAngieReply> {
     const memory = db.memory.list(userId)
     // Read env fresh (not load-time cache) — see AppConfig.isMock.
-    const apiKey = AppConfig.load().openaiApiKey
+    const cfg = AppConfig.load()
+    const apiKey = cfg.openaiApiKey
     const mock = AppConfig.isMock()
 
     const built = mock
       ? await AngieService.mockReply(db, userId, text, memory)
-      : await AngieService.liveReply(db, userId, text, memory, apiKey, now, lang)
+      : await AngieService.liveReply(db, userId, text, memory, apiKey, cfg.openaiModel, cfg.openaiBaseUrl, now, lang)
     const reply: IAngieReply = {...built, via: mock ? `mock` : `openai`}
 
     await db.memory.add(userId, {role: `user`, text, at: Date.now()})
@@ -279,6 +281,8 @@ export class AngieService {
     text: string,
     memory: ITurn[],
     apiKey: string,
+    model: string,
+    baseUrl: string,
     now: Date,
     lang: Lang,
   ): Promise<Omit<IAngieReply, `via`>> {
@@ -289,7 +293,7 @@ export class AngieService {
     ]
     const toolsUsed: string[] = []
     for (let round = 0; round < 3; round++) {
-      const {message} = await OpenAIClient.chat(apiKey, `gpt-4o-mini`, messages, TOOLS)
+      const {message} = await OpenAIClient.chat(apiKey, model, messages, TOOLS, baseUrl)
       const calls = message.tool_calls ?? []
       if (calls.length === 0) {
         const reply = (message.content ?? ``).trim()

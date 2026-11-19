@@ -32,7 +32,7 @@ flowchart TD
     HOOK -->|allowed| ROUTE{Message type?}
     ROUTE -->|text| CHAT[AngiePage.handleFreeText]
     ROUTE -->|voice| VOICE[AngiePage.handleFreeVoice<br/>download voice file]
-    VOICE --> POOL[TranscribePool<br/>@gramstax/worker-thread, 2 workers<br/>Whisper transcription]
+    VOICE --> POOL["TranscribePool<br/>@gramstax/worker-thread, 2 workers<br/>Whisper transcription"]
     POOL --> CHAT
     CHAT --> MEM_READ[Read memory<br/>LMDB, last 10 turns]
     MEM_READ --> AGENT[AngieService.chat<br/>GPT-4o-mini + system prompt<br/>English or Indonesian]
@@ -152,10 +152,16 @@ All settings live in `.env` and are wired through `gramstax.config.ts`. `gramsta
 | `BOT_DEPLOY` | Yes | `polling` (dev) · `webhook` · `serverless` (details in `optionsDeploy`) |
 | `CACHE_SESSION_STORE` | No | `memory` (single instance) or `redis:<url>` (multi-instance) |
 | `DB_PATH` | No | LMDB data path (default `./data`) |
-| `OPENAI_API_KEY` | No | OpenAI key for GPT-4o-mini answers + Whisper transcription. Empty = mock mode (simple answers from LMDB data) |
+| `OPENAI_API_KEY` | No | OpenAI key for AI answers + Whisper transcription. Empty + default base URL = mock mode (simple answers from LMDB data); empty + custom base URL = live mode without a key (keyless provider) |
+| `OPENAI_BASE_URL` | No | AI API base URL (default `https://api.openai.com/v1`). Any OpenAI-compatible provider works — e.g. Pollinations `https://text.pollinations.ai/openai` |
+| `OPENAI_MODEL` | No | AI model name (default `gpt-4o-mini`). Pollinations uses `openai` |
 | `GOOGLE_ACCESS_TOKEN` | No | Google OAuth2 access token for Gmail + Google Calendar (scopes `gmail.readonly` + `calendar.readonly`). Empty = the email/calendar tools honestly answer "not connected" — no fake data |
 | `ANGIE_ALLOWED_IDS` | No | AllowList: Telegram IDs allowed to use the bot, comma-separated. Empty = everyone allowed (dev mode) |
 | `ANGIE_MOCK_AI` | No | `1` forces mock answers even when `OPENAI_API_KEY` is set (used by e2e) |
+
+### OpenAI-compatible providers
+
+The AI layer speaks the OpenAI chat-completions API, so any compatible provider works: set `OPENAI_BASE_URL` to its base URL and `OPENAI_MODEL` to its model name. The `Authorization` header is only sent when `OPENAI_API_KEY` is set, so keyless providers work too — for example Pollinations (`OPENAI_BASE_URL=https://text.pollinations.ai/openai`, `OPENAI_MODEL=openai`) answers for free with no key. Voice transcription always uses the `whisper-1` model through the same base URL, so it needs a provider that supports the `/audio/transcriptions` endpoint; Pollinations does not, and voice notes then fail with an honest error instead of a fake transcript.
 
 ## Language
 

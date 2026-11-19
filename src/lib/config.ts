@@ -1,6 +1,10 @@
 /** Konfigurasi runtime Angie — semua rahasia hanya dari env, tidak pernah di-hardcode. */
+import {OPENAI_DEFAULT_BASE_URL} from "./openai"
+
 export interface AppConfigData {
   openaiApiKey: string
+  openaiBaseUrl: string
+  openaiModel: string
   googleAccessToken: string
   mockAi: boolean
   allowedIds: Set<number>
@@ -13,6 +17,8 @@ export class AppConfig {
   static load(env: NodeJS.ProcessEnv = process.env): AppConfigData {
     return {
       openaiApiKey: env.OPENAI_API_KEY ?? ``,
+      openaiBaseUrl: AppConfig.normalizeBaseUrl(env.OPENAI_BASE_URL ?? ``),
+      openaiModel: (env.OPENAI_MODEL ?? ``).trim() || `gpt-4o-mini`,
       googleAccessToken: env.GOOGLE_ACCESS_TOKEN ?? ``,
       mockAi: env.ANGIE_MOCK_AI === `1` || env.ANGIE_MOCK_AI === `true`,
       allowedIds: AppConfig.parseIds(env.ANGIE_ALLOWED_IDS ?? ``),
@@ -46,13 +52,27 @@ export class AppConfig {
     return out
   }
 
+  /** Trim + buang trailing slash; kosong = base URL default OpenAI. */
+  static normalizeBaseUrl(raw: string): string {
+    const trimmed = raw.trim().replace(/\/+$/, ``)
+    return trimmed === `` ? OPENAI_DEFAULT_BASE_URL : trimmed
+  }
+
+  /** True bila OPENAI_BASE_URL menunjuk ke provider selain OpenAI default. */
+  static isCustomBaseUrl(env: NodeJS.ProcessEnv = process.env): boolean {
+    return AppConfig.normalizeBaseUrl(env.OPENAI_BASE_URL ?? ``) !== OPENAI_DEFAULT_BASE_URL
+  }
+
   /**
-   * Mock aktif bila ANGIE_MOCK_AI=1 ATAU tidak ada OPENAI_API_KEY.
+   * Mock aktif bila ANGIE_MOCK_AI=1 ATAU tidak ada OPENAI_API_KEY DAN base
+   * URL masih default. Tanpa kunci + base URL kustom (mis. Pollinations
+   * gratis) = mode LIVE tanpa kunci, bukan mock.
    * Membaca env LANGSUNG (bukan cache load-time): e2e setup mengeset env
    * setelah modul diimpor, jadi cache akan ketinggalan.
    */
   static isMock(env: NodeJS.ProcessEnv = process.env): boolean {
     if (env.ANGIE_MOCK_AI === `1` || env.ANGIE_MOCK_AI === `true`) return true
-    return (env.OPENAI_API_KEY ?? ``).trim() === ``
+    if ((env.OPENAI_API_KEY ?? ``).trim() !== ``) return false
+    return !AppConfig.isCustomBaseUrl(env)
   }
 }
