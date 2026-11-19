@@ -8,9 +8,12 @@ orphan) dan `scripts/check-e2e-handlers.ts` (lapisan 2: setiap `handle*`
 di `src/pages` punya baris, setiap baris menamai file tes yang ada,
 setiap file tes dirujuk minimal satu baris).
 
-Semua template berbahasa Indonesia (blok default); tidak ada varian
-lang="id" terpisah. StatusPage tidak punya `handle*` sendiri — ia
-dirender lewat hook (lihat baris hook di bawah).
+Semua template bilingual: blok default berbahasa Inggris + varian
+lang="id" (multi-lang object bawaan Gramstax untuk konten statis
+template). String dinamis/logika lewat kamus `src/lib/i18n.ts`
+(English default, Indonesian per user via `/language`).
+StatusPage tidak punya `handle*` sendiri — ia dirender lewat hook
+(lihat baris hook di bawah).
 
 | Page | Handler / state | Trigger | Test | Asserts |
 | --- | --- | --- | --- | --- |
@@ -52,6 +55,13 @@ dirender lewat hook (lihat baris hook di bawah).
 | jadwal | handleCallbackQueryData | tombol Jadwal dari /start | e2e/jadwal.test.ts | editMessageText + "Google belum terhubung" |
 | lupakan | handleCommandText | `/lupakan` setelah 1 turn | e2e/lupakan.test.ts | gmsg(lupakan, default, {reply "Sudah kulupakan"}) + memory 0 baris |
 | lupakan | handleCommandText (lupa permanen) | "Apa yang aku suka?" setelah /lupakan | e2e/lupakan.test.ts | balasan "belum pernah cerita soal kesukaanmu" |
+| language | handleCommandText | `/language` (user EN) | e2e/language.test.ts | sendMessage + gmsg(language, show, {}, en) + keyboard [🇬🇧 English, 🇮🇩 Indonesia, ⬅️ Back] |
+| language | handleCommandText (varian id) | `/language` (user id) | e2e/language.test.ts | sendMessage + gmsg(language, show, {}, id) |
+| language | handleCallbackQueryData | tombol Language dari /start | e2e/language.test.ts | editMessageText + gmsg(language, show, {}, en) |
+| language | handleArgsCallbackQueryData (lang-id) | callback `lang-id` | e2e/language.test.ts | editMessageText + gmsg(language, done, {lang: Indonesia}, id) + /start berikutnya berbahasa Indonesia |
+| language | handleArgsCallbackQueryData (lang-en) | callback `lang-en` setelah id | e2e/language.test.ts | editMessageText + gmsg(language, done, {lang: English}, en) + /start berikutnya berbahasa Inggris |
+| language | handleArgsCallbackQueryData (balasan Angie ikut bahasa) | teks bebas setelah pilih id | e2e/language.test.ts | balasan mock 'Kamu bilang: "halo"' (Indonesia) |
+| language | handleCommandText (default EN, user baru) | teks bebas tanpa pilihan bahasa | e2e/language.test.ts | balasan mock 'You said: "hello"' (English default) |
 | status | hookNotFoundPage (callback tak dikenal) | callback `nonexistent-callback-data` | e2e/status.test.ts | editMessageText + gmsg(status, nf) |
 | status | hookNotFoundPage (command tak dikenal) | `/does-not-exist` | e2e/status.test.ts | sendMessage + gmsg(status, nf) |
 | status | handleFreeText (teks bebas = Angie) | teks "halo angie" | e2e/status.test.ts | sendMessage balasan Angie, BUKAN gmsg(status, nf) |

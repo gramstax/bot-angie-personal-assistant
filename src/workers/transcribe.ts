@@ -3,21 +3,21 @@ import {LogHe} from "~/helpers/log"
 import type {ITranscribeResult} from "~/types/transcribe"
 
 /**
- * Worker transkripsi voice Angie.
+ * Angie's voice transcription worker.
  *
- * Pekerjaan berat/async (download sudah dilakukan main thread, lalu
- * bytes audio + panggilan Whisper) dipindah ke worker thread supaya
- * handler Telegram utama tidak tersumbat — ini peran @gramstax/worker-thread
- * di bot ini, menggantikan node Speech-to-Text di n8n.
+ * Heavy/async work (the audio bytes + the Whisper call; the download
+ * already happened on the main thread) moves to a worker thread so the
+ * main Telegram handler never blocks — that is the role of
+ * @gramstax/worker-thread in this bot.
  *
- * `mtd*` adalah surface RPC yang bisa dipanggil main thread. Worker TIDAK
- * mengimpor ~/db atau ~/lib/angie: ia hanya menerima bytes (base64) dan
- * mengembalikan teks, supaya file worker tetap bisa di-launch mandiri.
+ * `mtd*` is the RPC surface the main thread can call. The worker does
+ * NOT import ~/db or ~/lib/angie: it only receives bytes (base64) and
+ * returns text, so the worker file can still be launched standalone.
  *
- * Mode mock (ANGIE_MOCK_AI=1 atau tanpa OPENAI_API_KEY): TIDAK ada panggilan
- * jaringan — mengembalikan teks stub deterministik supaya e2e bisa
- * membuktikan jalur voice end-to-end tanpa kunci API. Teks stub ini
- * sengaja berupa pertanyaan jadwal, supaya balasan Angie-nya bermakna.
+ * Mock mode (ANGIE_MOCK_AI=1 or no OPENAI_API_KEY): NO network calls —
+ * returns a deterministic stub text so e2e can prove the voice path
+ * end-to-end without API keys. The stub is deliberately a schedule
+ * question, so Angie's reply is meaningful.
  */
 export class Worker extends WorkerThreadInit {
   async mtdPing() {
@@ -29,7 +29,7 @@ export class Worker extends WorkerThreadInit {
       return {text: `Apa jadwalku besok?`, via: `mock`, threadId: this.id}
     }
     const apiKey = process.env.OPENAI_API_KEY ?? ``
-    if (!apiKey) throw new Error(`OPENAI_API_KEY belum diisi`)
+    if (!apiKey) throw new Error(`OPENAI_API_KEY is not set`)
     const bytes = Buffer.from(audioBase64, `base64`)
     const form = new FormData()
     form.append(`file`, new Blob([bytes], {type: `audio/ogg`}), fileName || `voice.ogg`)

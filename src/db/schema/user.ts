@@ -23,6 +23,17 @@ export class UserSchema extends LmdbSchema {
     // pass a timestamp.
     createdAt: t.date().$defaultFn(() => new Date()),
     // Maintained by the repository on update, hence optional.
-    updatedAt: t.date().optional()
+    updatedAt: t.date().optional(),
+    // Bot language chosen via /language ("en" | "id").
+    // lmdb-best-practices (schema-enum): a closed value set is declared
+    // as an enum, not a wide string — out-of-set writes are rejected by
+    // LmdbError on the write path instead of rotting silently until read.
+    // Validation only happens on write, so legacy rows still read and
+    // can be repaired by the hook.
+    // HARD WARNING: this field is deliberately LAST in value. LMDB
+    // encoding is positional — inserting a field in the middle shifts
+    // every field after it on legacy rows. A new field MUST always be
+    // appended at the END, never inserted in the middle.
+    botLang: t.enum(`en`, `id`).optional(),
   }
 }

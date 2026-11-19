@@ -16,7 +16,7 @@ describe(`E2E: StartPage`, () => {
     expect(reply).toBeDefined()
     expect(e2e.extractText(reply)).toContain(`Halo angieuser, aku Angie!`)
     expect(e2e.extractText(reply)).toContain(`/tugas`)
-    expect(e2e.extractButtonLabels(reply)).toEqual(e2e.gkb(intent, `default`, `inline`, {}))
+    expect(e2e.extractButtonLabels(reply)).toEqual(e2e.gkb(intent, `default`, `inline`, {}, `id`))
   })
 
   it(`edits the welcome page from a callback`, async () => {
@@ -25,8 +25,8 @@ describe(`E2E: StartPage`, () => {
     const responses = await e2e.sendCallbackQuery(intent, startUser)
     expect(responses.length).toBeGreaterThan(0)
     expect(responses[0]!.method).toBe(`editMessageText`)
-    expect(e2e.extractText(responses[0]!)).toBe(e2e.gmsg(intent, `default`, {userName: `angieuser`}))
-    expect(e2e.extractButtonLabels(responses[0]!)).toEqual(e2e.gkb(intent, `default`, `inline`, {}))
+    expect(e2e.extractText(responses[0]!)).toBe(e2e.gmsg(intent, `default`, {userName: `angieuser`}, `id`))
+    expect(e2e.extractButtonLabels(responses[0]!)).toEqual(e2e.gkb(intent, `default`, `inline`, {}, `id`))
   })
 
   it(`navigates to Tasks from the Start keyboard`, async () => {

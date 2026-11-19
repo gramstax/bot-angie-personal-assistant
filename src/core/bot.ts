@@ -2,6 +2,7 @@ import {Gramstax} from "gramstax"
 import {Db} from "~/db"
 import {LogHe} from "~/helpers/log"
 import {AppConfig} from "~/lib/config"
+import {I18n} from "~/lib/i18n"
 import {TranscribePool} from "~/lib/transcribe-pool"
 import {StatusPage} from "~/pages/status"
 import type {IErrorPageData} from "~/types/page"
@@ -44,30 +45,44 @@ export class BotCore extends Gramstax {
   async hookBeforeRoute(ctx: CtxCore) {
     const from = ctx.from
     if (!from?.id) return true
+    const profile = {
+      username: from.username ?? ``,
+      firstName: from.first_name ?? ``,
+      lastName: from.last_name,
+      languageCode: from.language_code,
+    }
     try {
-      await ctx.db.user.createIfNotExists(from.id, {
-        username: from.username ?? ``,
-        firstName: from.first_name ?? ``,
-        lastName: from.last_name,
-        languageCode: from.language_code,
-      })
+      const {user} = await ctx.db.user.createIfNotExists(from.id, profile)
+      // Language preference: a stored botLang overrides the Telegram
+      // client's language_code before templates render, so every page
+      // (EN default / lang="id" variant) follows the user's choice.
+      // A non-string botLang means the row was written before the field
+      // existed — rewrite it with the current schema (repair), then
+      // fall back to the client's language.
+      const stored = user.botLang
+      if (stored !== undefined && stored !== `en` && stored !== `id`) {
+        await ctx.db.user.rewriteProfile(from.id, profile)
+      } else if (stored === `en` || stored === `id`) {
+        from.language_code = stored
+      }
     } catch {
-      // Registrasi gagal tidak boleh menggagalkan route pengguna.
+      // Registration must never fail the user's route.
     }
     const allowed = AppConfig.allowedIds()
     if (allowed.size === 0) {
       if (!this._allowWarned) {
         this._allowWarned = true
-        LogHe.warn(`[angie] ANGIE_ALLOWED_IDS kosong — semua pengguna diizinkan (mode dev)`)
+        LogHe.warn(`[angie] ANGIE_ALLOWED_IDS is empty — all users are allowed (dev mode)`)
       }
       return true
     }
     if (!allowed.has(from.id)) {
       try {
         const chatId = ctx.chat?.id ?? from.id
-        await ctx.api.sendMessage(chatId, `Maaf, bot Angie ini hanya melayani pengguna yang diizinkan.`)
+        const lang = I18n.langOf({telegramLang: from.language_code})
+        await ctx.api.sendMessage(chatId, I18n.t(lang, `denyNotAllowed`))
       } catch {
-        // Gagal kirim penolakan — tetap tolak update-nya.
+        // Sending the denial failed — still reject the update.
       }
       return false
     }

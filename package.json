@@ -4,7 +4,7 @@
     "@gramstax/worker-thread": "6.1.0",
     "gramstax": "6.1.0"
   },
-  "description": "Angie \u2014 personal AI assistant di Telegram (teks + voice), dibangun ulang dari n8n workflow 2462 tanpa n8n: Gramstax 6.1.0 + TypeScript + Bun, DB @gramstax/lmdb, transkripsi voice di @gramstax/worker-thread, AI OpenAI gpt-4o-mini + Whisper, tools Gmail / Google Calendar / tugas / kontak.",
+  "description": "Angie — personal AI assistant on Telegram (text + voice), built with Gramstax 6.1.0 + TypeScript + Bun, LMDB storage, worker-thread transcription, OpenAI GPT-4o-mini + Whisper, Gmail / Google Calendar / tasks / contacts tools",
   "devDependencies": {
     "@types/bun": "latest"
   },

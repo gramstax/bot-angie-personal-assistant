@@ -48,7 +48,7 @@ export class OpenAIClient {
     }
     const data = (await res.json()) as {choices?: {message?: IChatMessage}[]}
     const message = data.choices?.[0]?.message
-    if (!message) throw new Error(`OpenAI chat: respons kosong`)
+    if (!message) throw new Error(`OpenAI chat: empty response`)
     return {message}
   }
 }

@@ -1,17 +1,16 @@
 import {PageBase} from "~/base/page"
 import {AngieService} from "~/lib/angie"
 import {AppConfig} from "~/lib/config"
+import {I18n} from "~/lib/i18n"
 import {TranscribePool} from "~/lib/transcribe-pool"
 
 /**
- * AngiePage — jantung bot: teks bebas & voice note apa pun masuk ke Angie.
- * Ini padanan "AI Agent (Angie)" + "Window Buffer Memory" di n8n workflow
- * 2462: trigger Telegram -> IF voice/text -> STT -> AI Agent -> balasan.
+ * AngiePage — the heart of the bot: any free text or voice note goes to Angie.
  *
- * - handleFreeText: teks bebas (bukan command) -> AngieService.chat.
- * - handleFreeVoice: voice note -> unduh file -> TranscribePool (worker
- *   thread, Whisper) -> tampilkan transkripsi singkat -> jawab sebagai Angie.
- *   Mode mock: unduhan dilewati, worker mengembalikan transkripsi stub.
+ * - handleFreeText: free text (not a command) -> AngieService.chat.
+ * - handleFreeVoice: voice note -> download the file -> TranscribePool
+ *   (worker thread, Whisper) -> show a short transcript -> answer as Angie.
+ *   Mock mode: the download is skipped, the worker returns a stub transcript.
  */
 export class AngiePage extends PageBase {
   static data = this.buildData()
@@ -34,7 +33,7 @@ export class AngiePage extends PageBase {
         const chatId = this.chat?.id ?? this.from?.id
         if (chatId !== undefined) await this.api.sendChatAction(chatId, `typing`)
       } catch {
-        // Indikator typing itu kosmetik — jawaban tetap jalan tanpanya.
+        // The typing indicator is cosmetic — the answer still goes through without it.
       }
     },
     answer: async (reply: string) => {
@@ -47,12 +46,13 @@ export class AngiePage extends PageBase {
     process: async (text: string) => {
       const userId = this.from?.id
       if (userId === undefined) return
+      const lang = this.lang()
       await this.helper.typing()
       try {
-        const {reply} = await AngieService.chat(this.db, userId, text)
+        const {reply} = await AngieService.chat(this.db, userId, text, lang)
         await this.helper.answer(reply)
       } catch (err) {
-        await this.helper.answer(`Maaf, ada yang salah saat aku memproses pesanmu. Coba lagi sebentar lagi ya.`)
+        await this.helper.answer(I18n.t(lang, `angieError`))
         throw err
       }
     },
@@ -63,6 +63,7 @@ export class AngiePage extends PageBase {
     process: async (fileId: string, _duration: number) => {
       const userId = this.from?.id
       if (userId === undefined) return
+      const lang = this.lang()
       await this.helper.typing()
       try {
         const mock = AppConfig.isMock()
@@ -73,26 +74,26 @@ export class AngiePage extends PageBase {
         const transcribed = await TranscribePool.transcribe(audioBase64, `voice.ogg`, mock)
         const text = transcribed.text.trim()
         if (!text) {
-          await this.helper.answer(`Maaf, aku tidak bisa mendengar isi voice note itu. Coba kirim lagi atau ketik saja pesannya.`)
+          await this.helper.answer(I18n.t(lang, `angieVoiceEmpty`))
           return
         }
-        const {reply} = await AngieService.chat(this.db, userId, text)
-        await this.helper.answer(`🎙️ Kamu bilang: "${text}"\n\n${reply}`)
+        const {reply} = await AngieService.chat(this.db, userId, text, lang)
+        await this.helper.answer(`${I18n.t(lang, `angieVoicePrefix`, {text})}\n\n${reply}`)
       } catch {
-        await this.helper.answer(`Maaf, transkripsi voice note gagal. Coba kirim lagi atau ketik saja pesannya.`)
+        await this.helper.answer(I18n.t(lang, `angieVoiceFail`))
       }
     },
   }
 
-  /** Unduh voice note Telegram ke base64. Hanya dipakai mode live. */
+  /** Download a Telegram voice note to base64. Live mode only. */
   static async downloadVoice(page: AngiePage, fileId: string): Promise<string> {
     const token = process.env.BOT_TOKEN ?? ``
-    if (!token) throw new Error(`BOT_TOKEN belum diisi`)
+    if (!token) throw new Error(`BOT_TOKEN is not set`)
     const file = await page.api.getFile(fileId)
     const path = file.file_path
-    if (!path) throw new Error(`Telegram tidak mengembalikan file_path`)
+    if (!path) throw new Error(`Telegram did not return a file_path`)
     const res = await fetch(`https://api.telegram.org/file/bot${token}/${path}`)
-    if (!res.ok) throw new Error(`Unduh voice gagal: HTTP ${res.status}`)
+    if (!res.ok) throw new Error(`Voice download failed: HTTP ${res.status}`)
     const buf = Buffer.from(await res.arrayBuffer())
     return buf.toString(`base64`)
   }

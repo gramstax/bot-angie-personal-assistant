@@ -1,6 +1,7 @@
 import {PageBase} from "~/base/page"
+import {I18n} from "~/lib/i18n"
 
-/** /tambahtugas <teks> — tambah satu tugas ke LMDB. */
+/** /tambahtugas <text> — add one task to LMDB. */
 export class TambahTugasPage extends PageBase {
   static data = this.buildData()
 
@@ -16,20 +17,21 @@ export class TambahTugasPage extends PageBase {
 
   gdefault = {
     show: async () => {
-      await this.renderText({data: {reply: `Tulis tugasnya setelah perintah — contoh: /tambahtugas Beli susu di warung.`}})
+      await this.renderText({data: {reply: I18n.t(this.lang(), `addTaskPrompt`)}})
     },
     process: async (title: string) => {
       const userId = this.from?.id
       if (userId === undefined) return
+      const lang = this.lang()
       const result = await this.db.tasks.add(userId, title)
       if (!result.ok) {
         const reply = result.reason === `full`
-          ? `Tugasmu sudah mencapai batas (100). Selesaikan dulu beberapa dengan /selesai <id>.`
-          : `Tulis tugasnya setelah perintah — contoh: /tambahtugas Beli susu di warung.`
+          ? I18n.t(lang, `addTaskFull`)
+          : I18n.t(lang, `addTaskPrompt`)
         await this.renderText({data: {reply}})
         return
       }
-      await this.renderText({data: {reply: `✅ Tugas ditambahkan: [${result.task.id}] ${result.task.title}\n\nLihat semuanya dengan /tugas.`}})
+      await this.renderText({data: {reply: I18n.t(lang, `addTaskAdded`, {id: result.task.id, title: result.task.title})}})
     },
   }
 

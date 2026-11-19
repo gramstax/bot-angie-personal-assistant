@@ -1,8 +1,9 @@
 import {PageBase} from "~/base/page"
 import {GoogleService} from "~/lib/google"
 import {AppConfig} from "~/lib/config"
+import {I18n} from "~/lib/i18n"
 
-/** /email — ringkasan email unread hari ini (pengganti node Get Email / Gmail di n8n). */
+/** /email — a summary of today's unread emails. */
 export class EmailPage extends PageBase {
   static data = this.buildData()
 
@@ -18,16 +19,17 @@ export class EmailPage extends PageBase {
 
   gdefault = {
     show: async () => {
+      const lang = this.lang()
       const token = AppConfig.load().googleAccessToken
-      const result = await GoogleService.listUnreadEmails(token)
+      const result = await GoogleService.listUnreadEmails(token, {lang})
       let reply: string
       if (!result.connected) {
-        reply = `✉️ ${result.reason}\n\nTanpa token itu aku tidak bisa membaca emailmu — dan aku tidak akan mengarang isinya.`
+        reply = `✉️ ${result.reason}\n\n${I18n.t(lang, `emailNotConnectedNote`)}`
       } else if (result.items.length === 0) {
-        reply = `✉️ Inbox bersih — tidak ada email unread hari ini.`
+        reply = I18n.t(lang, `emailClean`)
       } else {
         const lines = result.items.map((e) => `• ${e.subject}\n  ${e.from} — ${e.date}`)
-        reply = `✉️ Email unread hari ini (${result.items.length}):\n${lines.join(`\n`)}`
+        reply = `${I18n.t(lang, `emailHeader`, {count: result.items.length})}\n${lines.join(`\n`)}`
       }
       await this.renderText({data: {reply}})
     },

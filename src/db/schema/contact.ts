@@ -4,8 +4,7 @@ import {LmdbSchema, t} from "@gramstax/lmdb"
 export type IVContact = ValueOf<typeof ContactSchema>
 
 /**
- * Kontak pengguna — pengganti tabel Contacts Baserow di n8n.
- * Satu baris per userId: daftar kontak sebagai JSON + nextId monotonik.
+ * One row per userId: the contact list as JSON + a monotonic nextId.
  */
 export class ContactSchema extends LmdbSchema {
   static db = `contacts`

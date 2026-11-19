@@ -1,6 +1,7 @@
 import {PageBase} from "~/base/page"
+import {I18n} from "~/lib/i18n"
 
-/** /selesai <id> — tandai satu tugas selesai di LMDB. */
+/** /selesai <id> — mark one task done in LMDB. */
 export class SelesaiPage extends PageBase {
   static data = this.buildData()
 
@@ -16,23 +17,24 @@ export class SelesaiPage extends PageBase {
 
   gdefault = {
     show: async () => {
-      await this.renderText({data: {reply: `Tulis nomor tugasnya — contoh: /selesai 1. Lihat nomornya di /tugas.`}})
+      await this.renderText({data: {reply: I18n.t(this.lang(), `donePrompt`)}})
     },
     process: async (raw: string) => {
       const userId = this.from?.id
       if (userId === undefined) return
+      const lang = this.lang()
       const id = Number(raw.trim())
       if (!Number.isInteger(id) || id <= 0) {
-        await this.renderText({data: {reply: `Nomor tugasnya tidak valid: "${raw}". Lihat nomornya di /tugas, lalu /selesai <id>.`}})
+        await this.renderText({data: {reply: I18n.t(lang, `doneInvalid`, {raw})}})
         return
       }
       const result = await this.db.tasks.complete(userId, id)
       const reply =
         result === `ok`
-          ? `✅ Tugas [${id}] selesai. Kerja bagus!`
+          ? I18n.t(lang, `doneOk`, {id})
           : result === `already-done`
-            ? `Tugas [${id}] memang sudah selesai sebelumnya.`
-            : `Tidak ada tugas dengan nomor [${id}]. Lihat daftarnya di /tugas.`
+            ? I18n.t(lang, `doneAlready`, {id})
+            : I18n.t(lang, `doneNotFound`, {id})
       await this.renderText({data: {reply}})
     },
   }

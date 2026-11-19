@@ -1,6 +1,7 @@
 import {PageBase} from "~/base/page"
+import {I18n} from "~/lib/i18n"
 
-/** /tambahkontak <nama> | <email> | <telepon> — tambah satu kontak ke LMDB. */
+/** /tambahkontak <name> | <email> | <phone> — add one contact to LMDB. */
 export class TambahKontakPage extends PageBase {
   static data = this.buildData()
 
@@ -16,11 +17,12 @@ export class TambahKontakPage extends PageBase {
 
   gdefault = {
     show: async () => {
-      await this.renderText({data: {reply: `Formatnya: /tambahkontak <nama> | <email> | <telepon>\nContoh: /tambahkontak Budi | budi@mail.com | 08123456789\nEmail dan telepon boleh dikosongkan, tapi nama wajib ada.`}})
+      await this.renderText({data: {reply: I18n.t(this.lang(), `addContactPrompt`)}})
     },
     process: async (raw: string) => {
       const userId = this.from?.id
       if (userId === undefined) return
+      const lang = this.lang()
       const parts = raw.split(`|`).map((p) => p.trim())
       const name = parts[0] ?? ``
       const result = await this.db.contacts.add(userId, {
@@ -30,13 +32,14 @@ export class TambahKontakPage extends PageBase {
       })
       if (!result.ok) {
         const reply = result.reason === `full`
-          ? `Kontakmu sudah mencapai batas (200).`
-          : `Namanya belum ada. Formatnya: /tambahkontak <nama> | <email> | <telepon>.`
+          ? I18n.t(lang, `addContactFull`)
+          : I18n.t(lang, `addContactNoName`)
         await this.renderText({data: {reply}})
         return
       }
       const c = result.contact
-      await this.renderText({data: {reply: `✅ Kontak disimpan: ${c.name}${c.email ? ` — ${c.email}` : ``}${c.phone ? ` — ${c.phone}` : ``}\n\nCari dengan /kontak ${c.name}.`}})
+      const extra = `${c.email ? ` — ${c.email}` : ``}${c.phone ? ` — ${c.phone}` : ``}`
+      await this.renderText({data: {reply: I18n.t(lang, `addContactSaved`, {name: c.name, extra})}})
     },
   }
 

@@ -24,6 +24,33 @@ export class HelpPage extends PageBase {
     <g-base>
       ${this.kbk.back()}
       <g-message>
+        <b>🆘 Help — Angie</b>
+
+        <b>Chat directly</b>
+        Send any text, or send a voice note — I will answer as Angie.
+        I remember the last 10 messages of our chat, so context is kept
+        even if the bot restarts.
+
+        <b>Commands</b>
+        /start — introduction &amp; main menu
+        /tugas — your task list
+        /tambahtugas &lt;text&gt; — add a new task
+        /selesai &lt;id&gt; — mark a task done
+        /kontak [name] — find a contact
+        /tambahkontak &lt;name&gt; | &lt;email&gt; | &lt;phone&gt; — add a contact
+        /email — today's unread emails (not promotions)
+        /jadwal [date] — events for that day (example: /jadwal tomorrow)
+        /language — switch language (English / Indonesia)
+        /lupakan — erase my memory of this chat
+        /help — this page
+
+        <b>What to set up so every feature works</b>
+        • OPENAI_API_KEY — for AI answers &amp; voice transcription.
+          Without it I still run, but answers are in simple mode.
+        • GOOGLE_ACCESS_TOKEN — for Google email &amp; calendar.
+          Without it I will honestly say I am not connected yet.
+      </g-message>
+      <g-message lang="id">
         <b>🆘 Bantuan — Angie</b>
 
         <b>Ngobrol langsung</b>
@@ -40,6 +67,7 @@ export class HelpPage extends PageBase {
         /tambahkontak &lt;nama&gt; | &lt;email&gt; | &lt;telepon&gt; — tambah kontak
         /email — email unread hari ini (bukan promo)
         /jadwal [tanggal] — acara hari itu (contoh: /jadwal besok)
+        /language — ganti bahasa (English / Indonesia)
         /lupakan — hapus ingatanku tentang obrolan ini
         /help — halaman ini
 

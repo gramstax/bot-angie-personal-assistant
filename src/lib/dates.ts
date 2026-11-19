@@ -1,6 +1,7 @@
 /**
- * Tanggal/waktu Asia/Jakarta + parser tanggal Bahasa Indonesia sederhana
- * untuk tool kalender/email ("hari ini", "besok", "lusa", ISO, DD/MM/YYYY).
+ * Asia/Jakarta dates and times + a simple date parser for the
+ * calendar/email tools, in both languages ("today", "tomorrow", "hari
+ * ini", "besok", "lusa", ISO, DD/MM/YYYY, "19 November 2026").
  */
 export class Dates {
   static readonly TZ = `Asia/Jakarta`
@@ -32,8 +33,8 @@ export class Dates {
     return dt.toISOString().slice(0, 10)
   }
 
-  static jakartaLong(now = new Date()): string {
-    return new Intl.DateTimeFormat(`id-ID`, {
+  static jakartaLong(now = new Date(), locale = `en-GB`): string {
+    return new Intl.DateTimeFormat(locale, {
       timeZone: Dates.TZ,
       weekday: `long`,
       day: `numeric`,
@@ -45,15 +46,15 @@ export class Dates {
   }
 
   /**
-   * Parse permintaan tanggal dari bahasa pengguna. Mengembalikan kunci
-   * YYYY-MM-DD atau undefined bila tidak dikenali (caller memakai hari ini).
+   * Parse a date request in the user's language. Returns a YYYY-MM-DD
+   * key, or undefined when unrecognized (the caller falls back to today).
    */
-  static parseIndonesianDate(text: string, now = new Date()): string | undefined {
+  static parseDate(text: string, now = new Date()): string | undefined {
     const lower = text.toLowerCase()
     const today = Dates.keyOf(now)
-    if (/\blusa\b/.test(lower)) return Dates.addDays(today, 2)
-    if (/\bbesok\b/.test(lower)) return Dates.addDays(today, 1)
-    if (/\bhari ini\b/.test(lower) || /\bsekarang\b/.test(lower)) return today
+    if (/\blusa\b/.test(lower) || /\bday after tomorrow\b/.test(lower)) return Dates.addDays(today, 2)
+    if (/\bbesok\b/.test(lower) || /\btomorrow\b/.test(lower)) return Dates.addDays(today, 1)
+    if (/\bhari ini\b/.test(lower) || /\bsekarang\b/.test(lower) || /\btoday\b/.test(lower) || /\bnow\b/.test(lower)) return today
     const iso = lower.match(/(\d{4})-(\d{2})-(\d{2})/)
     if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`
     const dmy = lower.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
@@ -63,15 +64,22 @@ export class Dates {
       return `${dmy[3]}-${mm}-${dd}`
     }
     const months: Record<string, string> = {
-      januari: `01`, februari: `02`, maret: `03`, april: `04`, mei: `05`, juni: `06`,
-      juli: `07`, agustus: `08`, september: `09`, oktober: `10`, november: `11`, desember: `12`,
+      januari: `01`, january: `01`, februari: `02`, february: `02`, maret: `03`, march: `03`,
+      april: `04`, mei: `05`, may: `05`, juni: `06`, june: `06`,
+      juli: `07`, july: `07`, agustus: `08`, august: `08`, september: `09`,
+      oktober: `10`, october: `10`, november: `11`, desember: `12`, december: `12`,
     }
-    const named = lower.match(/(\d{1,2})\s+(januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember)(?:\s+(\d{4}))?/)
+    const named = lower.match(/(\d{1,2})\s+(januari|january|februari|february|maret|march|april|mei|may|juni|june|juli|july|agustus|august|september|oktober|october|november|desember|december)(?:\s+(\d{4}))?/)
     if (named) {
       const year = named[3] ?? String(now.getFullYear())
       return `${year}-${months[named[2]!]!}-${(named[1] ?? `1`).padStart(2, `0`)}`
     }
     return undefined
+  }
+
+  /** Backwards-compatible alias — same parser, same behavior. */
+  static parseIndonesianDate(text: string, now = new Date()): string | undefined {
+    return Dates.parseDate(text, now)
   }
 
   /** Rentang [awal hari, awal hari berikutnya] untuk satu kunci tanggal (UTC, cukup untuk query Calendar). */

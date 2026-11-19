@@ -2,8 +2,9 @@ import {PageBase} from "~/base/page"
 import {Dates} from "~/lib/dates"
 import {GoogleService} from "~/lib/google"
 import {AppConfig} from "~/lib/config"
+import {I18n} from "~/lib/i18n"
 
-/** /jadwal [tanggal] — acara Google Calendar pada satu tanggal (pengganti node Get Calendar di n8n). */
+/** /jadwal [date] — Google Calendar events for one date. */
 export class JadwalPage extends PageBase {
   static data = this.buildData()
 
@@ -23,18 +24,19 @@ export class JadwalPage extends PageBase {
 
   gdefault = {
     show: async (raw?: string) => {
-      const dateKey = (raw ? Dates.parseIndonesianDate(raw) : undefined) ?? Dates.todayKey()
-      const label = raw ? dateKey : `hari ini (${dateKey})`
+      const lang = this.lang()
+      const dateKey = (raw ? Dates.parseDate(raw) : undefined) ?? Dates.todayKey()
+      const label = raw ? dateKey : `${I18n.t(lang, `jadwalToday`)} (${dateKey})`
       const token = AppConfig.load().googleAccessToken
-      const result = await GoogleService.listEvents(token, dateKey)
+      const result = await GoogleService.listEvents(token, dateKey, lang)
       let reply: string
       if (!result.connected) {
-        reply = `📅 ${result.reason}\n\nTanpa token itu aku tidak bisa membaca kalendermu — dan aku tidak akan mengarang acaranya.`
+        reply = `📅 ${result.reason}\n\n${I18n.t(lang, `jadwalNotConnectedNote`)}`
       } else if (result.items.length === 0) {
-        reply = `📅 Tidak ada acara pada ${label}. Harimu kosong, silakan dinikmati.`
+        reply = I18n.t(lang, `jadwalNoEvents`, {label})
       } else {
         const lines = result.items.map((e) => `• ${e.start.slice(11, 16)}–${e.end.slice(11, 16)} ${e.summary}${e.location ? ` @ ${e.location}` : ``}`)
-        reply = `📅 Jadwal ${label} (${result.items.length} acara):\n${lines.join(`\n`)}`
+        reply = `${I18n.t(lang, `jadwalHeader`, {label, count: result.items.length})}\n${lines.join(`\n`)}`
       }
       await this.renderText({data: {reply}})
     },

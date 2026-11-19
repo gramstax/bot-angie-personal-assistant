@@ -1,6 +1,7 @@
 import {PageBase} from "~/base/page"
+import {I18n} from "~/lib/i18n"
 
-/** /kontak [nama] — cari/daftar kontak dari LMDB (pengganti tabel Contacts Baserow di n8n). */
+/** /kontak [name] — search/list contacts from LMDB. */
 export class KontakPage extends PageBase {
   static data = this.buildData()
 
@@ -18,16 +19,20 @@ export class KontakPage extends PageBase {
 
   helper = {
     format: (userId: number, query?: string): string => {
+      const lang = this.lang()
       const contacts = this.db.contacts.search(userId, query ?? ``)
       if (contacts.length === 0) {
         return query
-          ? `Tidak ada kontak yang cocok dengan "${query}". Tambah dengan /tambahkontak <nama> | <email> | <telepon>.`
-          : `Kamu belum menyimpan kontak. Tambah dengan /tambahkontak <nama> | <email> | <telepon> — contoh: /tambahkontak Budi | budi@mail.com | 08123456789.`
+          ? I18n.t(lang, `kontakNoMatch`, {query})
+          : I18n.t(lang, `kontakEmpty`)
       }
       const lines = contacts.map(
         (c) => `👤 ${c.name}${c.email ? `\n   ✉️ ${c.email}` : ``}${c.phone ? `\n   📞 ${c.phone}` : ``}${c.note ? `\n   📝 ${c.note}` : ``}`,
       )
-      return `👤 Kontak${query ? ` untuk "${query}"` : ``} (${contacts.length}):\n${lines.join(`\n`)}`
+      const header = query
+        ? I18n.t(lang, `kontakHeaderQuery`, {query, count: contacts.length})
+        : I18n.t(lang, `kontakHeader`, {count: contacts.length})
+      return `${header}\n${lines.join(`\n`)}`
     },
   }
 

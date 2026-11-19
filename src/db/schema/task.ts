@@ -4,9 +4,8 @@ import {LmdbSchema, t} from "@gramstax/lmdb"
 export type IVTask = ValueOf<typeof TaskSchema>
 
 /**
- * Tugas pengguna — pengganti tabel Tasks Baserow di n8n.
- * Satu baris per userId (pola History gramstax-youtube-bot): daftar tugas
- * sebagai JSON + nextId monotonik untuk penomoran stabil.
+ * One row per userId (same pattern as the History store): the task
+ * list as JSON + a monotonic nextId for stable numbering.
  */
 export class TaskSchema extends LmdbSchema {
   static db = `tasks`

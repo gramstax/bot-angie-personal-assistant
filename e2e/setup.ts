@@ -40,6 +40,8 @@ export const addKontakUser = {user: {id: 4702, username: `addkontakuser`, langua
 export const emailUser = {user: {id: 4801, username: `emailuser`, language_code: `id`}}
 export const jadwalUser = {user: {id: 4802, username: `jadwaluser`, language_code: `id`}}
 export const lupakanUser = {user: {id: 4901, username: `lupakanuser`, language_code: `id`}}
+export const languageUser = {user: {id: 4902, username: `languser`, language_code: `en`}}
+export const languageDefaultUser = {user: {id: 4903, username: `langdefault`, language_code: `en`}}
 export const statusUser = {user: {id: 4951, username: `statususer`, language_code: `id`}}
 export const coverageUser = {user: {id: 4952, username: `coverageuser`, language_code: `id`}}
 export const deniedUser = {user: {id: 4999, username: `denieduser`, language_code: `id`}}
@@ -47,7 +49,7 @@ export const noUsernameUser = {user: {id: 4202, language_code: `id`}}
 export const dbUser = {user: {id: 4101, username: `dbuser`, language_code: `id`}}
 
 const FIXTURE_IDS = [
-  9001, 4601, 4401, 4402, 4403, 4301, 4302, 4303, 4701, 4702, 4801, 4802, 4901, 4951, 4952, 4999, 4202, 4101,
+  9001, 4601, 4401, 4402, 4403, 4301, 4302, 4303, 4701, 4702, 4801, 4802, 4901, 4902, 4903, 4951, 4952, 4999, 4202, 4101,
 ]
 
 /** Bersihkan state persisten fixture (memori, tugas, kontak) per tes. */

@@ -4,10 +4,9 @@ import {LmdbSchema, t} from "@gramstax/lmdb"
 export type IVMemory = ValueOf<typeof MemorySchema>
 
 /**
- * Memori percakapan Angie — pengganti Window Buffer Memory n8n yang
- * volatile. Satu baris per userId, berisi max 10 turn terakhir (user +
- * assistant) sebagai JSON. Persisten di LMDB, jadi konteks tidak hilang
- * saat proses restart — ini improvement dari flow n8n asli.
+ * Angie's conversation memory: one row per userId holding the last
+ * 10 turns (user + assistant) as JSON. Persistent in LMDB, so context
+ * survives a process restart.
  */
 export class MemorySchema extends LmdbSchema {
   static db = `memory`

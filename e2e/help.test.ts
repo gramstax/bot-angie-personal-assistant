@@ -16,7 +16,7 @@ describe(`E2E: HelpPage`, () => {
     expect(responses.length).toBeGreaterThan(0)
     const edit = responses[0]!
     expect(edit.method).toBe(`editMessageText`)
-    expect(e2e.extractText(edit)).toBe(e2e.gmsg(intent, `default`, {}))
+    expect(e2e.extractText(edit)).toBe(e2e.gmsg(intent, `default`, {}, `id`))
     expect(e2e.extractButtonLabels(edit)).toEqual(e2e.gkb(intent, `default`, `inline`, {}, `id`))
   })
 
@@ -25,7 +25,7 @@ describe(`E2E: HelpPage`, () => {
     expect(responses.length).toBeGreaterThan(0)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(reply).toBeDefined()
-    expect(e2e.extractText(reply)).toBe(e2e.gmsg(intent, `default`, {}))
+    expect(e2e.extractText(reply)).toBe(e2e.gmsg(intent, `default`, {}, `id`))
     expect(e2e.extractButtonLabels(reply)).toEqual(e2e.gkb(intent, `default`, `inline`, {}, `id`))
   })
 })

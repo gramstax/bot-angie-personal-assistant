@@ -1,12 +1,51 @@
 # AGENTS.md
 
-## Angie — catatan proyek (2026-11-19, menggantikan sebagian scaffold)
+## STRICT RECREATE RULES (Damar, 2026-11-19 — apply to Angie AND every
+## future recreate project, no exceptions)
 
-- Bot ini adalah recreate n8n workflow 2462 tanpa n8n. Lihat `README.md`
-  untuk pemetaan n8n → Gramstax.
-- **Db BUKAN singleton scaffold**: `src/db/index.ts` memakai pola
-  gramstax-youtube-bot — `BotCore` memiliki `db` sebagai field instance,
-  disuntikkan ke ctx (`this.db`). Tidak ada `Db.open/get/start/stop`.
+1. **English only in repo content**: repo description + README.md in
+   English; README follows the `create-gramstax` 6.1.0 template style
+   (title + badges, Features, Quick Start, Scripts table, Project
+   Structure, Configuration, Testing, Deployment, Tech Stack, License).
+2. **Original-flow source lives in `references/`** (NEVER `assets/`).
+   Do NOT name the original workflow tool in the repo description,
+   `package.json` description, or main README.md — it is only a
+   reference inside `references/` (its README + the JSON file name).
+3. **README.md MUST contain a Mermaid flowchart** of this project's
+   own code flow.
+4. **Repo description MUST start with 1 emoji**, English.
+5. **Bilingual, English by default**: every user-facing message is
+   English by default AND Indonesian. Language is stored per user in
+   LMDB (`UserSchema.botLang`), changed with `/language`; follow
+   `gramstax-best-practices`, `lmdb-best-practices`, and
+   `worker-thread-best-practices` (6.1.0).
+6. **Multi-lang object = static template content messages ONLY.**
+   Static template content (welcome, help, keyboards, language picker)
+   MUST use Gramstax's built-in multi-lang object: `<g-message>` /
+   `<g-keyboard>` blocks with a `lang="id"` variant plus the English
+   default, selected by the user's `language_code`
+   (skill `template-i18n.md`; docs: gramstax.mintlify.site). Never use
+   hardcoded strings or the custom `I18n` dictionary for that part.
+   Dynamic / logic strings (tool results, runtime errors, Angie's mock
+   replies) go through the per-user language mechanism
+   (`src/lib/i18n.ts`, default English). The two mechanisms must not be
+   mixed up: if a string lives in a template, it is a multi-lang object;
+   if it is built by logic, it is `I18n.t`.
+7. **Repo names**: recreate projects start with `bot-*` + a
+   representation of the flow (e.g. `bot-angie-personal-assistant`).
+   `chad-bot*` is reserved for a LATER variant whose behavior is
+   changed to not depend on third parties ("chad" = the programmer meme
+   of fully automating without hassle).
+8. **Every recreate project MUST have `references/`** with the original
+   workflow's `.json` file.
+
+## Angie — project notes (2026-11-19, replacing part of the scaffold)
+
+- This bot recreates the original workflow 2462 (see `references/`).
+  The code-flow mapping is in `README.md`.
+- **Db is NOT the scaffold singleton**: `src/db/index.ts` follows the
+  gramstax-youtube-bot pattern — `BotCore` owns `db` as an instance
+  field, injected into ctx (`this.db`). There is no `Db.open/get/start/stop`.
 - **`src/core/services.ts` dan `src/workers/job.ts` DIHAPUS.** Worker yang
   ada adalah `src/workers/transcribe.ts` (Whisper) + pool lazy
   `src/lib/transcribe-pool.ts` (2 worker, launch SEQUENTIAL — launch
