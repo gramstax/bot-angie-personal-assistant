@@ -39,6 +39,10 @@ describe(`E2E: LanguagePage`, () => {
     const reply = e2e.lastCall(`sendMessage`)!
     expect(reply).toBeDefined()
     expect(e2e.extractText(reply)).toBe(e2e.gmsg(intent, `default`, {}, `id`))
+    // The picker keyboard comes from the single KeyboardGBlock.languagePicker()
+    // definition — the ID variant shows the Indonesian Back label.
+    expect(e2e.extractButtonLabels(reply)).toEqual([`🇬🇧 English`, `🇮🇩 Indonesia`, `⬅️ Kembali`])
+    expect(e2e.extractButtonLabels(reply)).toEqual(e2e.gkb(intent, `default`, `inline`, {}, `id`))
   })
 
   it(`shows the same picker from the Language button (callback)`, async () => {

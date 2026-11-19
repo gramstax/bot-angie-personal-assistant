@@ -22,7 +22,7 @@
 6. **Bilingual command text via `intentCommandTextMap` (Damar,
    2026-11-19 ~14:30 WIB).** Every command has an English (default) and
    an Indonesian spelling that route to the SAME page — e.g. `/contact`
-   and `/kontak` both open `kontak.ts`. Declare it in the existing page
+   and `/kontak` both open `contact.ts`. Declare it in the existing page
    only, no new file:
    `static data = this.buildData({intentCommandText: {default: "contact", id: "kontak"}})`.
    Framework (Gramstax 6.1.0) registers ALL map values as route intents,
@@ -34,19 +34,22 @@
    free-text handler (`angie.ts`) is not a command — never force it into
    one. E2E (skill `e2e-coverage.md`, "Intent variants"): send each
    mapped intent with a fixture carrying that `language_code`
-   (`e2e/commands-i18n.test.ts`).
-7. **Multi-lang object = static template content messages ONLY.**
-   Static template content (welcome, help, keyboards, language picker)
-   MUST use Gramstax's built-in multi-lang object: `<g-message>` /
-   `<g-keyboard>` blocks with a `lang="id"` variant plus the English
-   default, selected by the user's `language_code`
-   (skill `template-i18n.md`; docs: gramstax.mintlify.site). Never use
-   hardcoded strings or the custom `I18n` dictionary for that part.
-   Dynamic / logic strings (tool results, runtime errors, Angie's mock
-   replies) go through the per-user language mechanism
-   (`src/lib/i18n.ts`, default English). The two mechanisms must not be
-   mixed up: if a string lives in a template, it is a multi-lang object;
-   if it is built by logic, it is `I18n.t`.
+   (`e2e/commands-lang.test.ts`).
+7. **Localization = static template blocks ONLY. `src/lib/i18n.ts` is
+   FORBIDDEN (Damar, 2026-11-19 ~14:43 WIB — "tidak berguna").** Every
+   user-facing message lives in the page's `static template`:
+   `<g-message>` / `<g-message lang="id">`, `<g-switch>`, `<g-map>`,
+   `<g-ifelse>` (EN default + ID variant). Helpers and services only
+   compute DATA (render state, list rows, machine-readable error codes)
+   and pass it as template variables — never a localized sentence.
+   There is no string dictionary anywhere in the code; the only
+   language helper is `src/lib/lang.ts`, which resolves the language
+   CODE (`en` | `id`), never a message. The two documented exceptions
+   are NOT user-facing: the LLM system prompt and the model-facing
+   tokens in `src/lib/angie.ts` (`formatForModel`, `memoryText`).
+   Docs: gramstax.mintlify.site; skill `template-i18n.md` and the other
+   `template-*` references; patterns copied from `example/1-complex`
+   in the gramstax repo.
 8. **Repo names**: recreate projects start with `bot-*` + a
    representation of the flow (e.g. `bot-angie-personal-assistant`).
    `chad-bot*` is reserved for a LATER variant whose behavior is
@@ -72,6 +75,69 @@
 15. ~~Emoji on every README parent heading~~ — **REVOKED by Damar
     2026-11-19 ~14:40 WIB: this rule is deleted.** README `##` headings
     carry no emoji (removed in the same commit).
+16. **When building with Gramstax is hard, read the framework's own
+    `example/` code (Damar, 2026-11-19 ~14:45 WIB).**
+    https://github.com/gramstax/gramstax/tree/main/example/ (e.g.
+    `example/1-complex`) — copy the pattern used there when the docs or
+    a skill does not explain a template syntax (loops, conditionals,
+    `g-message` lang variants). Docs + skill first, example code when
+    they are not enough.
+17. **Conventional Commits with scope (Damar, 2026-11-19 ~14:49 WIB).**
+    Every commit message is `type(scope): subject`, e.g.
+    `refactor(pages): ...`, `feat(pages): ...`, `fix(language): ...`,
+    `chore(...): ...`. Never a free-form message.
+18. **Every project MUST have CODE_OF_CONDUCT.md, CONTRIBUTING.md, and
+    SECURITY.md in the repo root (Damar, 2026-11-19 ~14:49 WIB).**
+    English, standard content fitting the project; security reports go
+    to Telegram @damartripamungkas — never claim a channel that does
+    not exist.
+19. **Every repo MUST have TOPICS for SEO (Damar, 2026-11-19 ~14:49
+    WIB)**, representing the project, set via
+    `gh repo edit <owner>/<repo> --add-topic ...` and verified with
+    `gh api repos/<owner>/<repo> --jq '.topics'`. Check existing topics
+    first; never add a duplicate.
+20. **Page file names are ENGLISH only (Damar, 2026-11-19 ~14:55 WIB).**
+    `tasks.ts`, `addtask.ts`, `done.ts`, `contact.ts`, `addcontact.ts`,
+    `schedule.ts`, `forget.ts` — never an Indonesian file name. The
+    Indonesian spelling stays reachable through
+    `intentCommandTextMap` (rule 6). Rename with `git mv` so history
+    survives; rename the page class too (`TasksPage`, `AddTaskPage`,
+    `DonePage`, `ContactPage`, `AddContactPage`, `SchedulePage`,
+    `ForgetPage`) and every import, e2e mirror file, and
+    `e2e/COVERAGE.md` row. A rename changes the route (file name =
+    route name in Gramstax 6.1.0), so e2e must prove both command
+    spellings still reach the same page.
+21. **Command descriptions sync via `<g-description>` (Damar,
+    2026-11-19 ~14:55 WIB).** Every command page declares its
+    description in its OWN template's default `<g-base>`: one block
+    with the original English text plus one `<g-description lang="id">`
+    with the Indonesian text. The framework syncs them to the BotFather
+    command list at bot start (`executeSyncBlocksDescription` →
+    `setMyCommands`, one call per language). **Framework finding
+    (verified 2026-11-19 from the framework source + a probe): the
+    descriptions CANNOT be centralized in `start/index.ts` — the sync
+    reads `getGDescription("<page-name>", "default", lang, scope)`, so
+    a description placed in start's template would only ever sync
+    /start.** Each page carries its own block; `e2e/descriptions.test.ts`
+    proves the sync sees all 11 commands. **Caveat, same probe:** the
+    framework pushes one entry per `handleCommandText` route entry, so
+    a bilingual-mapped page would list its command TWICE in the menu —
+    `BotCore` overrides `executeSyncBlocksDescription` to dedupe by
+    command name (same three passes, same diff-against-`getMyCommands`
+    contract). Do not remove that override without fixing the
+    duplication another way.
+22. **Multi-language keyboards are defined ONCE in
+    `src/blocks/g-keyboard.ts` (Damar, 2026-11-19 ~14:58 WIB).** One
+    `{default, id}` label object per keyboard in
+    `KeyboardGBlock.label`, one builder method per keyboard
+    (`mainMenu()`, `languagePicker()`, `home()`, `back()`, …) — the
+    framework's `_build` emits BOTH `<g-keyboard>` variants from that
+    single definition. No page template ever writes the EN and ID
+    keyboards twice. The template supplies the labels per language;
+    the handler wires each label position to its callback
+    (`inlineKeyboardT(...)` / `inlineKeyboard(...)`). E2E must prove
+    the keyboard shows the right labels in both languages
+    (`e2e/start/index.test.ts`, `e2e/language.test.ts`).
 
 ## Angie — project notes (2026-11-19, replacing part of the scaffold)
 
@@ -86,8 +152,9 @@
   paralel berebut state export dan hanya menghasilkan 1 thread).
 - **Guard username scaffold TIDAK dipakai**: `hookBeforeRoute` hanya
   registrasi user best-effort + AllowList `ANGIE_ALLOWED_IDS`.
-- **Nama file page = nama route/command**: `tugas.ts` → `/tugas`
-  (bukan `tasks.ts`).
+- **Nama file page = nama route/command**: `tasks.ts` → `/tasks`
+  (Indonesian `/tugas` via `intentCommandTextMap` on the same page).
+  Page files are English only (strict rule 20).
 - Render dari pesan memakai `sendMessage` (bukan `sendRichMessage`)
   di Gramstax 6.1.0 — tes e2e menyesuaikan ini.
 - `ANGIE_MOCK_AI=1` di `e2e/setup.ts`: e2e berjalan tanpa kunci live.

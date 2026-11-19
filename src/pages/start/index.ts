@@ -1,10 +1,10 @@
 import {PageBase} from "~/base/page"
 import {EmailPage} from "../email"
 import {HelpPage} from "../help"
-import {JadwalPage} from "../jadwal"
-import {KontakPage} from "../kontak"
+import {SchedulePage} from "../schedule"
+import {ContactPage} from "../contact"
 import {LanguagePage} from "../language"
-import {TugasPage} from "../tugas"
+import {TasksPage} from "../tasks"
 
 export class StartPage extends PageBase {
   static data = this.buildData()
@@ -23,7 +23,7 @@ export class StartPage extends PageBase {
       await this.clearSession()
       await this.renderText({
         mode: `auto`,
-        keyboard: this.inlineKeyboardT([TugasPage, KontakPage, EmailPage, JadwalPage, LanguagePage, HelpPage], `2`),
+        keyboard: this.inlineKeyboardT([TasksPage, ContactPage, EmailPage, SchedulePage, LanguagePage, HelpPage], `2`),
         data: {userName: this.from?.username ?? this.from?.first_name ?? `you`},
       })
     },
@@ -32,8 +32,9 @@ export class StartPage extends PageBase {
 
   static template = `
     <g-base>
-      <g-keyboard type="inline">📋 Tasks, 👤 Contacts, ✉️ Email, 📅 Schedule, 🌐 Language, 🆘 Help</g-keyboard>
-      <g-keyboard type="inline" lang="id">📋 Tugas, 👤 Kontak, ✉️ Email, 📅 Jadwal, 🌐 Bahasa, 🆘 Bantuan</g-keyboard>
+      <g-description>Introduction and main menu</g-description>
+      <g-description lang="id">Perkenalan dan menu utama</g-description>
+      ${this.kbk.mainMenu()}
       <g-message>
         <b>👋 Hello {{userName}}, I'm Angie!</b>
 

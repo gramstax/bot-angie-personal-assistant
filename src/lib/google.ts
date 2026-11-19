@@ -1,5 +1,4 @@
 import {Dates} from "~/lib/dates"
-import {I18n, type Lang} from "~/lib/i18n"
 
 export interface IEmailSummary {
   id: string
@@ -16,28 +15,34 @@ export interface ICalendarEvent {
   location?: string
 }
 
+/** Machine-readable failure reason — the human sentence lives in the page template. */
+export type GoogleErrorCode = `no-token` | `gmail-error` | `calendar-error`
+
 export type GoogleResult<T> =
   | {connected: true; items: T[]}
-  | {connected: false; reason: string}
+  | {connected: false; code: GoogleErrorCode; status?: number}
 
 /**
- * Direct Google API adapter (plain fetch REST, OAuth2 Bearer from env
+ * Direct Google API adapter (plain fetch REST, OAuth2 Bearer <redacted> env
  * GOOGLE_ACCESS_TOKEN) for Gmail and Google Calendar.
  *
  * There is NO mock data: when no token is set, the tool returns
  * `{connected: false}` and Angie answers honestly that Google is not
  * connected. `fetchFn` can be injected from tests so unit tests never
  * touch the network.
+ *
+ * Strict rule (Damar 2026-11-19 ~14:43 WIB): no user-facing strings in this
+ * file — a failure is a `code` (+ HTTP `status`), and the page's static
+ * template renders the sentence in the user's language.
  */
 export class GoogleService {
   static fetchFn: typeof fetch = fetch
 
   static async listUnreadEmails(
     token: string,
-    opts?: {afterKey?: string; max?: number; lang?: Lang},
+    opts?: {afterKey?: string; max?: number},
   ): Promise<GoogleResult<IEmailSummary>> {
-    const lang = opts?.lang ?? `en`
-    if (!token) return {connected: false, reason: I18n.t(lang, `googleNotConnected`)}
+    if (!token) return {connected: false, code: `no-token`}
     const after = opts?.afterKey ?? Dates.todayKey()
     const q = encodeURIComponent(`is:unread in:inbox -category:promotions after:${after.replaceAll(`-`, `/`)}`)
     const listRes = await GoogleService.fetchFn(
@@ -45,7 +50,7 @@ export class GoogleService {
       {headers: {Authorization: `Bearer ${token}`}},
     )
     if (!listRes.ok) {
-      return {connected: false, reason: I18n.t(lang, `googleGmailError`, {status: listRes.status})}
+      return {connected: false, code: `gmail-error`, status: listRes.status}
     }
     const list = (await listRes.json()) as {messages?: {id: string}[]}
     const items: IEmailSummary[] = []
@@ -72,15 +77,15 @@ export class GoogleService {
     return {connected: true, items}
   }
 
-  static async listEvents(token: string, dateKey: string, lang: Lang = `en`): Promise<GoogleResult<ICalendarEvent>> {
-    if (!token) return {connected: false, reason: I18n.t(lang, `googleNotConnected`)}
+  static async listEvents(token: string, dateKey: string): Promise<GoogleResult<ICalendarEvent>> {
+    if (!token) return {connected: false, code: `no-token`}
     const {timeMin, timeMax} = Dates.dayRange(dateKey)
     const url =
       `https://www.googleapis.com/calendar/v3/calendars/primary/events` +
       `?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=20`
     const res = await GoogleService.fetchFn(url, {headers: {Authorization: `Bearer ${token}`}})
     if (!res.ok) {
-      return {connected: false, reason: I18n.t(lang, `googleCalendarError`, {status: res.status})}
+      return {connected: false, code: `calendar-error`, status: res.status}
     }
     const data = (await res.json()) as {
       items?: {summary?: string; start?: {dateTime?: string; date?: string}; end?: {dateTime?: string; date?: string}; location?: string}[]

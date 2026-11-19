@@ -34,7 +34,7 @@ import {dirname, join} from "node:path"
  * src/pages counterpart. List their path relative to e2e/, e.g. `manifest-boot.test.ts`.
  * Without this, adding such a test makes the mirror check fail on an orphan.
  */
-const EXTRA_TESTS: ReadonlyArray<string> = [`coverage.test.ts`, `db-lmdb.test.ts`, `commands-i18n.test.ts`]
+const EXTRA_TESTS: ReadonlyArray<string> = [`coverage.test.ts`, `db-lmdb.test.ts`, `commands-lang.test.ts`, `descriptions.test.ts`]
 
 // ── Parse CLI ─────────────────────────────────────────────────────────
 

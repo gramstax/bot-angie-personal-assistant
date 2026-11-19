@@ -7,19 +7,19 @@ afterEach(() => {
   GoogleService.fetchFn = realFetch
 })
 
-function stubFetch(handler: (url: string) => unknown) {
+function stubFetch(handler: (url: string) => unknown, status = 200) {
   GoogleService.fetchFn = (async (url: string | URL | Request) => {
     const body = handler(String(url))
-    return new Response(JSON.stringify(body), {status: 200, headers: {"Content-Type": `application/json`}})
+    return new Response(JSON.stringify(body), {status, headers: {"Content-Type": `application/json`}})
   }) as typeof fetch
 }
 
 describe(`GoogleService`, () => {
-  it(`returns not-connected without a token — never fake data`, async () => {
+  it(`returns not-connected with code no-token without a token — never fake data`, async () => {
     const emails = await GoogleService.listUnreadEmails(``)
-    expect(emails.connected).toBe(false)
+    expect(emails).toEqual({connected: false, code: `no-token`})
     const events = await GoogleService.listEvents(``, `2026-11-19`)
-    expect(events.connected).toBe(false)
+    expect(events).toEqual({connected: false, code: `no-token`})
   })
 
   it(`lists unread emails excluding promo via the query`, async () => {
@@ -48,6 +48,12 @@ describe(`GoogleService`, () => {
     expect(result.items[0]!.from).toBe(`bos@kantor.com`)
   })
 
+  it(`reports gmail-error with the HTTP status on a 401`, async () => {
+    stubFetch(() => ({error: {message: `Invalid Credentials`}}), 401)
+    const result = await GoogleService.listUnreadEmails(`bad-token`)
+    expect(result).toEqual({connected: false, code: `gmail-error`, status: 401})
+  })
+
   it(`lists calendar events for the requested date range`, async () => {
     let seenUrl = ``
     stubFetch((url) => {
@@ -62,5 +68,11 @@ describe(`GoogleService`, () => {
     if (!result.connected) return
     expect(result.items[0]!.summary).toBe(`Rapat tim`)
     expect(result.items[0]!.location).toBe(`Ruang A`)
+  })
+
+  it(`reports calendar-error with the HTTP status on a 401`, async () => {
+    stubFetch(() => ({error: {message: `Invalid Credentials`}}), 401)
+    const result = await GoogleService.listEvents(`bad-token`, `2026-11-19`)
+    expect(result).toEqual({connected: false, code: `calendar-error`, status: 401})
   })
 })

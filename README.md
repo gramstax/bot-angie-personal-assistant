@@ -128,7 +128,7 @@ Any other text — or a voice note — goes straight to Angie. She remembers the
 │   ├── core/          # Bot entry (BotCore) and context (CtxCore)
 │   ├── db/            # LMDB schemas + repositories
 │   ├── helpers/       # Domain helpers (logging)
-│   ├── lib/           # AngieService, OpenAI client, Google adapter, dates, i18n, config, transcribe pool
+│   ├── lib/           # AngieService, OpenAI client, Google adapter, dates, lang resolver, config, transcribe pool
 │   ├── pages/         # Bot screens: one file (or folder) per route
 │   ├── types/         # Shared types grouped by domain: user, angie, transcribe, page
 │   ├── utils/         # Pure generic utilities
@@ -162,8 +162,8 @@ All settings live in `.env` and are wired through `gramstax.config.ts`. `gramsta
 
 The bot is bilingual — English by default, Indonesian per user.
 
-- **Static template content** (welcome, help, keyboards, language picker) uses Gramstax's built-in multi-lang object: `<g-message>` / `<g-keyboard>` blocks with a `lang="id"` variant plus the English default, selected by the user's `language_code` (see the `template-i18n` rules in `gramstax-best-practices`).
-- **Dynamic / logic strings** (tool results, runtime errors, Angie's mock replies) go through the per-user language dictionary in `src/lib/i18n.ts`, resolved from the stored preference.
+- **Every user-facing message lives in a page's `static template`** (`<g-message>` / `<g-switch>` / `<g-map>` / `<g-ifelse>` blocks, English default + `lang="id"` variant). There is no string dictionary in code: helpers and pages only compute data (the render state, list rows, error codes) and pass it as template variables. Keyboards are defined once in `src/blocks/g-keyboard.ts` (`KeyboardGBlock`), which emits both language variants from a single label definition. Command descriptions live in each page's own `<g-description>` block (EN + ID) and are synced to the BotFather command list when the bot starts.
+- **Dynamic / logic data** (tool results, runtime errors, Angie's mock replies) is structured data, not sentences: the service returns a `kind` + data fields (`label`, `code`, `lines`, …) and the template renders the sentence in the user's language.
 - The preference is stored per user in LMDB (`UserSchema.botLang`, appended last in the schema — LMDB encoding is positional) and set with `/language`. It is applied in `hookBeforeRoute` by overriding `from.language_code`. A non-string stored value falls back to English and never crashes.
 
 ## Testing
@@ -187,11 +187,11 @@ E2E tests drive the real bot in-process (`deploy: test`) and assert every Telegr
 
 - **The live path (OpenAI + Google) is untested** — no `BOT_TOKEN`, `OPENAI_API_KEY`, or Google OAuth has been provided yet. What tests prove is: the Gramstax 6.1.0 scaffold, LMDB (user/memory/task/contact), the 2-thread worker pool (round-robin, mock transcription), mock AI + tool routing, and every command/page via the e2e harness. Do not claim live works before tokens are set and tested with a real bot.
 - **The worker pool must launch sequentially, not with `Promise.all`**: parallel launches race on the export state — a probe showed only 1 thread alive; sequential launches give 2 threads (see `src/lib/transcribe-pool.ts`).
-- **A page file name is its default route/command**: the task file is named `tugas.ts`, so `/tugas` works out of the box — `/tasks` is added with an `intentCommandText` map on the same page, not a second file.
+- **A page file name is its default route/command**: the task file is named `tasks.ts`, so `/tasks` works out of the box — `/tugas` is added with an `intentCommandText` map on the same page, not a second file.
 - **Rendering from a message uses `sendMessage`**, not `sendRichMessage`, in Gramstax 6.1.0 — the e2e tests follow this.
 - **Google access tokens expire.** The adapter uses the Bearer token from env as-is — there is no auto-refresh. Set a fresh access token when it expires.
 - A live voice note is downloaded via `api.telegram.org/file/bot<token>/...` and sent to Whisper as OGG; the Telegram Bot API caps files at 20 MB.
-- Memory window: the last 10 turns per user; `/lupakan` clears it.
+- Memory window: the last 10 turns per user; `/forget` (also `/lupakan`) clears it.
 - AllowList: when `ANGIE_ALLOWED_IDS` is set, users outside the list get a rejection message and their update is rejected in `hookBeforeRoute`.
 
 ## Tech Stack

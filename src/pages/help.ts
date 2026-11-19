@@ -22,6 +22,8 @@ export class HelpPage extends PageBase {
 
   static template = `
     <g-base>
+      <g-description>Full help and command list</g-description>
+      <g-description lang="id">Bantuan lengkap dan daftar perintah</g-description>
       ${this.kbk.back()}
       <g-message>
         <b>🆘 Help — Angie</b>

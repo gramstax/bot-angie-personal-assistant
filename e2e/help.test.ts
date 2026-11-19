@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, it} from "bun:test"
-import {e2e, helpUser, resetEnv, startUser} from "./setup"
+import {cmdEnUser, e2e, helpUser, resetEnv, startUser} from "./setup"
 
 const intent = `help`
 
@@ -18,6 +18,15 @@ describe(`E2E: HelpPage`, () => {
     expect(edit.method).toBe(`editMessageText`)
     expect(e2e.extractText(edit)).toBe(e2e.gmsg(intent, `default`, {}, `id`))
     expect(e2e.extractButtonLabels(edit)).toEqual(e2e.gkb(intent, `default`, `inline`, {}, `id`))
+  })
+
+  it(`answers the /help command in English for an en user`, async () => {
+    const responses = await e2e.sendText(`/help`, cmdEnUser)
+    expect(responses.length).toBeGreaterThan(0)
+    const reply = e2e.lastCall(`sendMessage`)!
+    expect(reply).toBeDefined()
+    expect(e2e.extractText(reply)).toBe(e2e.gmsg(intent, `default`, {}, `en`))
+    expect(e2e.extractButtonLabels(reply)).toEqual(e2e.gkb(intent, `default`, `inline`, {}, `en`))
   })
 
   it(`answers the /help command`, async () => {

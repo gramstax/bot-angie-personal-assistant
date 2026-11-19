@@ -1,8 +1,22 @@
 import {afterAll, beforeEach, describe, expect, it} from "bun:test"
-import {bot, e2e, angieMemoryUser, angieUser, angieVoiceUser, resetEnv} from "./setup"
+import {bot, cmdEnUser, e2e, angieMemoryUser, angieUser, angieVoiceUser, resetEnv} from "./setup"
 import {TranscribePool} from "../src/lib/transcribe-pool"
 
 const intent = `angie`
+
+/** Full data object the Angie page passes to its template (see toTemplateData). */
+const base = {
+  voiceText: ``,
+  reply: ``,
+  text: ``,
+  turns: 0,
+  liked: ``,
+  label: ``,
+  date: ``,
+  code: ``,
+  status: 0,
+  lines: [] as string[],
+}
 
 beforeEach(async () => {
   e2e.clearCalls()
@@ -13,16 +27,25 @@ afterAll(async () => {
   await TranscribePool.shutdown()
 })
 
-describe(`E2E: AngiePage — teks bebas`, () => {
-  it(`answers free text as Angie in mock mode and stores the turn in memory`, async () => {
+describe(`E2E: AngiePage — free text`, () => {
+  it(`answers free text as Angie in mock mode and stores the turn in memory (Indonesian)`, async () => {
     const responses = await e2e.sendText(`Halo Angie`, angieUser)
     expect(responses.length).toBeGreaterThan(0)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(reply).toBeDefined()
     expect(e2e.extractText(reply)).toBe(
-      e2e.gmsg(intent, `default`, {reply: `Baik, dicatat. Kamu bilang: "Halo Angie". Kita sudah ngobrol 1 pesan — ada lagi yang bisa kubantu?`}),
+      e2e.gmsg(intent, `default`, {...base, kind: `mock-echo`, text: `Halo Angie`, turns: 1}, `id`),
     )
     expect(bot.db.memory.list(4401).length).toBe(2)
+  })
+
+  it(`answers free text as Angie in mock mode (English default)`, async () => {
+    const responses = await e2e.sendText(`Hello Angie`, cmdEnUser)
+    expect(responses.length).toBeGreaterThan(0)
+    const reply = e2e.lastCall(`sendMessage`)!
+    expect(e2e.extractText(reply)).toBe(
+      e2e.gmsg(intent, `default`, {...base, kind: `mock-echo`, text: `Hello Angie`, turns: 1}, `en`),
+    )
   })
 
   it(`remembers context across turns: turn 2 answers from turn 1`, async () => {
@@ -31,7 +54,7 @@ describe(`E2E: AngiePage — teks bebas`, () => {
     const responses = await e2e.sendText(`Apa yang aku suka?`, angieMemoryUser)
     const reply = e2e.lastCall(`sendMessage`)!
     expect(e2e.extractText(reply)).toBe(
-      e2e.gmsg(intent, `default`, {reply: `Kamu suka kopi tubruk — itu yang kamu bilang sebelumnya.`}),
+      e2e.gmsg(intent, `default`, {...base, kind: `mock-like-found`, liked: `kopi tubruk`}, `id`),
     )
     // Window buffer: 2 turn tanya-jawab = 4 baris tersimpan.
     expect(bot.db.memory.list(4402).length).toBe(4)
@@ -42,14 +65,17 @@ describe(`E2E: AngiePage — teks bebas`, () => {
     e2e.clearCalls()
     const responses = await e2e.sendText(`Apa saja tugasku?`, angieUser)
     const reply = e2e.lastCall(`sendMessage`)!
-    expect(e2e.extractText(reply)).toContain(`Ini daftar tugasmu:`)
-    expect(e2e.extractText(reply)).toContain(`[1] Beli susu`)
+    expect(e2e.extractText(reply)).toBe(
+      e2e.gmsg(intent, `default`, {...base, kind: `mock-tools-ok`, label: `tasks`, lines: [`⬜ [1] Beli susu`]}, `id`),
+    )
   })
 
   it(`is honest when Google is not connected: email question says so`, async () => {
     const responses = await e2e.sendText(`Ada email apa hari ini?`, angieUser)
     const reply = e2e.lastCall(`sendMessage`)!
-    expect(e2e.extractText(reply)).toContain(`Google belum terhubung`)
+    expect(e2e.extractText(reply)).toBe(
+      e2e.gmsg(intent, `default`, {...base, kind: `mock-tools-noconnect`, label: `email`, code: `no-token`}, `id`),
+    )
   })
 
   it(`sends a typing indicator before the Angie reply`, async () => {

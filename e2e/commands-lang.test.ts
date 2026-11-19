@@ -27,7 +27,7 @@ afterAll(async () => {
 })
 
 describe(`E2E: bilingual commands — same page, EN + ID`, () => {
-  it(`tugas: /tasks (en) and /tugas (id) both list tasks`, async () => {
+  it(`tasks: /tasks (en) and /tugas (id) both list tasks`, async () => {
     const en = await e2e.sendText(`/tasks`, cmdEnUser)
     expect(en.length).toBeGreaterThan(0)
     expect(e2e.extractText(e2e.lastCall(`sendMessage`)!)).toContain(`You have no tasks yet`)
@@ -37,7 +37,7 @@ describe(`E2E: bilingual commands — same page, EN + ID`, () => {
     expect(e2e.extractText(e2e.lastCall(`sendMessage`)!)).toContain(`Kamu belum punya tugas`)
   })
 
-  it(`tambahtugas: /addtask (en) and /tambahtugas (id) both add a task`, async () => {
+  it(`addtask: /addtask (en) and /tambahtugas (id) both add a task`, async () => {
     const en = await e2e.sendText(`/addtask Buy milk`, cmdEnUser)
     expect(en.length).toBeGreaterThan(0)
     expect(e2e.extractText(e2e.lastCall(`sendMessage`)!)).toContain(`✅ Task added: [1] Buy milk`)
@@ -49,7 +49,7 @@ describe(`E2E: bilingual commands — same page, EN + ID`, () => {
     expect(bot.db.tasks.list(4962).length).toBe(1)
   })
 
-  it(`selesai: /done (en) and /selesai (id) both mark a task done`, async () => {
+  it(`done: /done (en) and /selesai (id) both mark a task done`, async () => {
     await bot.db.tasks.add(4961, `Buy milk`)
     await bot.db.tasks.add(4962, `Beli susu`)
     const en = await e2e.sendText(`/done 1`, cmdEnUser)
@@ -63,7 +63,7 @@ describe(`E2E: bilingual commands — same page, EN + ID`, () => {
     expect(bot.db.tasks.list(4962)[0]!.done).toBe(true)
   })
 
-  it(`kontak: /contact (en) and /kontak (id) both list contacts`, async () => {
+  it(`contact: /contact (en) and /kontak (id) both list contacts`, async () => {
     const en = await e2e.sendText(`/contact`, cmdEnUser)
     expect(en.length).toBeGreaterThan(0)
     expect(e2e.extractText(e2e.lastCall(`sendMessage`)!)).toContain(`You have not saved any contacts yet`)
@@ -73,7 +73,7 @@ describe(`E2E: bilingual commands — same page, EN + ID`, () => {
     expect(e2e.extractText(e2e.lastCall(`sendMessage`)!)).toContain(`Kamu belum menyimpan kontak`)
   })
 
-  it(`tambahkontak: /addcontact (en) and /tambahkontak (id) both save a contact`, async () => {
+  it(`addcontact: /addcontact (en) and /tambahkontak (id) both save a contact`, async () => {
     const en = await e2e.sendText(`/addcontact Budi | budi@mail.com`, cmdEnUser)
     expect(en.length).toBeGreaterThan(0)
     expect(e2e.extractText(e2e.lastCall(`sendMessage`)!)).toContain(`✅ Contact saved: Budi`)
@@ -85,7 +85,7 @@ describe(`E2E: bilingual commands — same page, EN + ID`, () => {
     expect(bot.db.contacts.search(4962, `Sari`).length).toBe(1)
   })
 
-  it(`jadwal: /schedule (en) and /jadwal (id) both show the calendar page`, async () => {
+  it(`schedule: /schedule (en) and /jadwal (id) both show the calendar page`, async () => {
     const en = await e2e.sendText(`/schedule`, cmdEnUser)
     expect(en.length).toBeGreaterThan(0)
     expect(e2e.extractText(e2e.lastCall(`sendMessage`)!)).toContain(`Without that token I cannot read your calendar`)
@@ -95,7 +95,7 @@ describe(`E2E: bilingual commands — same page, EN + ID`, () => {
     expect(e2e.extractText(e2e.lastCall(`sendMessage`)!)).toContain(`Tanpa token itu aku tidak bisa membaca kalendermu`)
   })
 
-  it(`lupakan: /forget (en) and /lupakan (id) both clear memory`, async () => {
+  it(`forget: /forget (en) and /lupakan (id) both clear memory`, async () => {
     await e2e.sendText(`I like tea`, cmdEnUser)
     await e2e.sendText(`Aku suka teh`, cmdIdUser)
     e2e.clearCalls()

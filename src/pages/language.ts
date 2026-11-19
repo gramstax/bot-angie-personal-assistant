@@ -1,5 +1,4 @@
 import {PageBase} from "~/base/page"
-import {I18n} from "~/lib/i18n"
 import {StartPage} from "./start"
 
 /**
@@ -68,10 +67,11 @@ export class LanguagePage extends PageBase {
       // language_code override makes the done template render in the
       // newly chosen language instead of the previous one.
       if (from) from.language_code = lang
-      await this.renderCallbackAnswer({
-        showAlert: false,
-        data: {toast: I18n.t(lang, lang === `id` ? `langChangedId` : `langChangedEn`)},
-      })
+      // The toast sentence lives in the template's <g-callback-answer>
+      // blocks (EN default + lang="id"); the engine picks the variant for
+      // the newly chosen language, so no data is passed here. Strict rule
+      // (Damar 2026-11-19 ~14:43 WIB): no string dictionary.
+      await this.renderCallbackAnswer({showAlert: false})
       await this.renderText({
         mode: `auto`,
         AGBaseId: Base.done,
@@ -83,8 +83,9 @@ export class LanguagePage extends PageBase {
 
   static template = `
     <g-base>
-      <g-keyboard type="inline">🇬🇧 English, 🇮🇩 Indonesia, ⬅️ Back</g-keyboard>
-      <g-keyboard type="inline" lang="id">🇬🇧 English, 🇮🇩 Indonesia, ⬅️ Kembali</g-keyboard>
+      <g-description>Switch language (English / Indonesia)</g-description>
+      <g-description lang="id">Ganti bahasa (English / Indonesia)</g-description>
+      ${this.kbk.languagePicker()}
       <g-message>
         <b>🌐 Choose language / Pilih bahasa</b>
 
@@ -97,7 +98,8 @@ export class LanguagePage extends PageBase {
         Bot ini memakai bahasa Inggris dan Indonesia.
         Ketuk tombol untuk mengatur bahasamu.
       </g-message>
-      <g-callback-answer>{{toast}}</g-callback-answer>
+      <g-callback-answer>Language set to English.</g-callback-answer>
+      <g-callback-answer lang="id">Bahasa diubah ke Indonesia.</g-callback-answer>
     </g-base>
 
     <g-base id="${Base.done}">
@@ -108,7 +110,8 @@ export class LanguagePage extends PageBase {
       <g-message lang="id">
         ✅ Bahasa diubah ke <b>{{lang}}</b>. Pakai /start untuk lanjut.
       </g-message>
-      <g-callback-answer>{{toast}}</g-callback-answer>
+      <g-callback-answer>Language set to English.</g-callback-answer>
+      <g-callback-answer lang="id">Bahasa diubah ke Indonesia.</g-callback-answer>
     </g-base>
   `
 }

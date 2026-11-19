@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, it} from "bun:test"
-import {e2e, resetEnv, statusUser} from "./setup"
+import {cmdEnUser, e2e, resetEnv, statusUser} from "./setup"
 
 const intent = `status`
 
@@ -24,6 +24,13 @@ describe(`E2E: StatusPage`, () => {
     expect(responses.length).toBeGreaterThan(0)
     expect(responses[0]!.method).toBe(`sendMessage`)
     expect(e2e.extractText(responses[0]!)).toBe(e2e.gmsg(intent, `nf`, {}, `id`))
+  })
+
+  it(`show 'Route not found' for an unknown command (English default)`, async () => {
+    const responses = await e2e.sendText(`/does-not-exist`, cmdEnUser)
+    expect(responses.length).toBeGreaterThan(0)
+    expect(responses[0]!.method).toBe(`sendMessage`)
+    expect(e2e.extractText(responses[0]!)).toBe(e2e.gmsg(intent, `nf`, {}, `en`))
   })
 
   it(`unknown free text goes to Angie, NOT to Route not found`, async () => {
