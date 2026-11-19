@@ -177,7 +177,14 @@
   kunci + base URL default = mock; tanpa kunci + base URL kustom = LIVE
   tanpa kunci. Transkripsi suara memakai base URL yang sama dan model
   `whisper-1` — provider tanpa dukungan `/audio/transcriptions`
-  (mis. Pollinations) gagal jujur, tanpa transkrip palsu. URL dibangun
+  (mis. Pollinations) gagal jujur, tanpa transkrip palsu.
+  **Rate-limit retry (ditambah 2026-11-19 setelah error 402 live di
+  bot DB Chat):** `OpenAIClient.chat` retry 402/429 sampai 3x, menunggu
+  "Retry after Ns" dari provider (default 45 dtk, maks 60 dtk) — satu
+  pertanyaan bisa memanggil model beberapa kali (tool rounds), tanpa
+  retry hampir selalu gagal di tier gratis. Diuji unit di
+  `test/openai.test.ts` (pakai "Retry after 0s" supaya suite tetap
+  cepat). URL dibangun
   lewat helper `OpenAIClient.chatCompletionsUrl` /
   `audioTranscriptionsUrl` di `src/lib/openai.ts` — tidak ada URL
   `api.openai.com` yang di-hardcode di `src/`.
