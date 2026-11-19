@@ -69,8 +69,9 @@
     (Damar, 2026-11-19 ~14:35 WIB): one short block right under the
     title/badges, before Features, in English, linking Telegram
     @damartripamungkas — placed to fit, never in the way.
-15. **Emoji on every README parent heading — `##` level ONLY** (Damar,
-    2026-11-19 ~14:35 WIB). Sub-headings (`###` and below) get no emoji.
+15. ~~Emoji on every README parent heading~~ — **REVOKED by Damar
+    2026-11-19 ~14:40 WIB: this rule is deleted.** README `##` headings
+    carry no emoji (removed in the same commit).
 
 ## Angie — project notes (2026-11-19, replacing part of the scaffold)
 
